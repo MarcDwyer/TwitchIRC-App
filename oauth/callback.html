@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Twitch OAuth</title>
+  </head>
+  <body>
+    <script type="module">
+      function parseHash(hash) {
+        const params = {};
+        const pairs = hash.substring(1).split("&");
+        for (const pair of pairs) {
+          const [key, value] = pair.split("=");
+          if (key && value) params[key] = decodeURIComponent(value);
+        }
+        return params;
+      }
+
+      const hash = window.location.hash;
+
+      if (hash) {
+        const params = parseHash(hash);
+        console.log({ hash, params });
+
+        fetch("/hash", {
+          method: "POST",
+          body: JSON.stringify({ ...params, hash }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((res) => res.text())
+          .then((text) => {
+            document.body.innerHTML = "<h1>" + text + "</h1>";
+          })
+          .catch((err) => {
+            document.body.innerHTML = "<h1>Error: " + err.message +
+              "</h1>";
+          });
+      } else {
+        document.body.innerHTML =
+          "<h1>Waiting for authorization...</h1>";
+      }
+    </script>
+  </body>
+</html>

@@ -12,32 +12,19 @@ const callbackHtml = await Deno.readTextFile("callback.html");
 
 const server = Deno.serve({
   port: 3000,
-  onListen: () => {
-    openBrowser(authUrl);
-  }
+  onListen: () => openBrowser(authUrl),
 }, async (req) => {
   const url = new URL(req.url);
-  
-  if (req.method === "POST" && url.pathname === "/callback") {
-    const formData = await req.formData();
-    const hash = formData.get("hash") as string;
+  if (req.method === "POST" && url.pathname === "/hash") {
+    const body = await req.json();
     
-    if (!hash) {
-      return new Response("Missing hash parameter", { status: 400 });
-    }
-    
-    const params = parseFragment(hash);
-    console.log({params});
-    if (params.state !== state) {
+    if (body.state !== state) {
       return new Response("State mismatch", { status: 403 });
     }
+  
     
-    if (params.error) {
-      return new Response(`Error: ${params.error_description || params.error}`, { status: 400 });
-    }
-    
-    if (params.access_token) {
-      const token = `oauth:${params.access_token}`;
+    if (body.access_token) {
+      const token = `oauth:${body.access_token}`;
       const envContent = await Deno.readTextFile(".env");
       const updated = envContent.includes("TWITCH_OAUTH_TOKEN")
         ? envContent.replace(/TWITCH_OAUTH_TOKEN=.*/g, `TWITCH_OAUTH_TOKEN=${token}`)
