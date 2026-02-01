@@ -1,5 +1,6 @@
 import BlurredText from "../components/BlurredText.tsx";
 import { CopyButton } from "../components/CopyButton.tsx";
+import { Following } from "../components/Following.tsx";
 import { LogoutBtn } from "../components/LogoutBtn.tsx";
 import { useCredentials, useOAuth } from "../context/credentials.tsx";
 
@@ -28,6 +29,9 @@ export function Dashboard() {
             </p>
           </div>
 
+          <div className="mb-6">
+            <Following />
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="bg-zinc-800 rounded-lg p-6 border border-zinc-700">
               <h3 className="text-lg font-medium text-zinc-100 mb-2">

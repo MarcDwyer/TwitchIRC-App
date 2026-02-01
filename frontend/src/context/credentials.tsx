@@ -7,7 +7,7 @@ import {
   useCallback,
 } from "react";
 
-import { checkTokenForValidation } from "../lib/twitch.ts";
+import { checkTokenForValidation } from "../lib/oauth.ts";
 
 const CLIENT_ID_KEY = "twitch_client_id";
 const OAUTH_KEY = "twitch_oauth";
@@ -63,7 +63,7 @@ export const useCredentials = () => {
 };
 
 export const useCredentialsActions = () => {
-  const { setCredentials, credentials } = useContext(CredentialsContext);
+  const { setCredentials } = useContext(CredentialsContext);
 
   const setClientID = useCallback(
     (clientID: string | null) => {
@@ -76,21 +76,6 @@ export const useCredentialsActions = () => {
     },
     [setCredentials],
   );
-
-  // const setOAuthToken = useCallback(
-  //   (token: string | null) => {
-  //     if (token) {
-  //       localStorage.setItem(OAUTH_KEY, token);
-  //     } else {
-  //       localStorage.removeItem(OAUTH_KEY);
-  //     }
-  //     setCredentials((prevState) => ({
-  //       ...prevState,
-  //       oauth: { token, validated: false },
-  //     }));
-  //   },
-  //   [setCredentials],
-  // );
 
   const logout = () => {
     localStorage.removeItem(OAUTH_KEY);
