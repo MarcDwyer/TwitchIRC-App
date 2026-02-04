@@ -124,4 +124,6 @@ This project is built with extensibility in mind. Potential future features incl
 
 For issues, questions, or feature requests, please open an issue on the GitHub repository.
 
+----- 
+
 README created by Claude the LLM
