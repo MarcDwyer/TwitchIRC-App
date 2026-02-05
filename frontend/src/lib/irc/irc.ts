@@ -2,11 +2,19 @@
 
 import { Channel } from "./channel.ts";
 
+type IRCEventType = "authenticated" | "onjoin";
+type IRCEventCallback<T = void> = (data: T) => void;
+
+type IRCEventDataMap = {
+  authenticated: void;
+  onjoin: { channel: Channel; channelName: string };
+};
+
 export class TwitchIRC {
   private ws: WebSocket | null = null;
   private oauthToken: string;
   private username: string;
-  private pendingActions: Map<string, (value?: any) => void> = new Map();
+  private eventListeners: Map<IRCEventType, IRCEventCallback<any>> = new Map();
   public channels: Map<string, Channel> = new Map();
 
   constructor(oauthToken: string, username: string) {
@@ -14,29 +22,47 @@ export class TwitchIRC {
     this.username = username;
   }
 
-  connect(): Promise<void> {
-    return new Promise((resolve) => {
-      this.pendingActions.set("auth", resolve);
+  setEventListener<T extends IRCEventType>(
+    event: T,
+    callback: IRCEventCallback<IRCEventDataMap[T]>,
+  ): void {
+    this.eventListeners.set(event, callback);
+  }
 
-      const ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
-      this.ws = ws;
-      this.ws.onopen = () => {
-        console.log("Connected to Twitch IRC");
-        this.authenticate();
-      };
+  removeEventListener<T extends IRCEventType>(event: T): void {
+    this.eventListeners.delete(event);
+  }
 
-      this.ws.onmessage = (event) => {
-        this.handleMessage(event.data, ws);
-      };
+  private dispatchEvent<T extends IRCEventType>(
+    event: T,
+    data?: IRCEventDataMap[T],
+  ): void {
+    const callback = this.eventListeners.get(event);
+    if (callback) {
+      callback(data);
+    }
+  }
 
-      this.ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
-      };
+  connect(): void {
+    const ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
+    this.ws = ws;
 
-      this.ws.onclose = () => {
-        console.log("Disconnected from Twitch IRC");
-      };
-    });
+    this.ws.onopen = () => {
+      console.log("Connected to Twitch IRC");
+      this.authenticate();
+    };
+
+    this.ws.onmessage = (event) => {
+      this.handleMessage(event.data, ws);
+    };
+
+    this.ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+    };
+
+    this.ws.onclose = () => {
+      console.log("Disconnected from Twitch IRC");
+    };
   }
 
   private authenticate(): void {
@@ -54,11 +80,7 @@ export class TwitchIRC {
 
     if (data.includes("001")) {
       console.log("Successfully authenticated");
-      const resolver = this.pendingActions.get("auth");
-      if (resolver) {
-        resolver();
-        this.pendingActions.delete("auth");
-      }
+      this.dispatchEvent("authenticated");
     }
 
     if (data.includes("JOIN")) {
@@ -66,14 +88,11 @@ export class TwitchIRC {
       if (match) {
         const [, username, channelName] = match;
 
-        // Check if this is our own join (initial connection)
-        const resolver = this.pendingActions.get(channelName);
-        if (resolver) {
+        if (username.toLowerCase() === this.username.toLowerCase()) {
           console.log(`Successfully joined ${channelName}`);
           const channel = new Channel(ws, channelName);
           this.channels.set(channelName, channel);
-          resolver(channel);
-          this.pendingActions.delete(channelName);
+          this.dispatchEvent("onjoin", { channel, channelName });
         }
       }
     }
@@ -182,18 +201,15 @@ export class TwitchIRC {
     }
   }
 
-  join(channel: string): Promise<Channel> {
-    channel = channel.toLowerCase();
-    return new Promise((resolve) => {
-      if (!this.ws) {
-        return;
-      }
+  join(channel: string): void {
+    if (!this.ws) {
+      return;
+    }
 
-      const channelName = channel.startsWith("#") ? channel : `#${channel}`;
-      this.pendingActions.set(channelName, resolve);
-      this.ws.send(`JOIN ${channelName}`);
-      console.log(`Joining ${channelName}`);
-    });
+    channel = channel.toLowerCase();
+    const channelName = channel.startsWith("#") ? channel : `#${channel}`;
+    this.ws.send(`JOIN ${channelName}`);
+    console.log(`Joining ${channelName}`);
   }
 
   disconnect(): void {
@@ -202,7 +218,7 @@ export class TwitchIRC {
       this.ws = null;
     }
     this.channels.clear();
-    this.pendingActions.clear();
+    this.eventListeners.clear();
     console.log("Disconnected from Twitch IRC");
   }
 }

@@ -1,4 +1,4 @@
-export interface MessageEvent {
+export interface ChatMessageEvent {
   username: string;
   content: string;
   channel: string;
@@ -46,7 +46,7 @@ export interface MentionEvent {
 }
 
 export type ChannelEventMap = {
-  PRIVMSG: MessageEvent;
+  PRIVMSG: ChatMessageEvent;
   USERNOTICE: UserNoticeEvent;
   CLEARCHAT: ClearChatEvent;
   CLEARMSG: ClearMsgEvent;
@@ -61,7 +61,7 @@ export type ChannelEventType = keyof ChannelEventMap;
 export class Channel {
   private ws: WebSocket;
   public name: string;
-  private listeners: Map<ChannelEventType, Array<(data: any) => void>> = new Map();
+  private listeners: Map<ChannelEventType, (data: any) => void> = new Map();
 
   constructor(ws: WebSocket, name: string) {
     this.ws = ws;
@@ -73,36 +73,27 @@ export class Channel {
   }
 
   part(): void {
-    this.ws.send(`PART ${this.name}`);  
+    this.ws.send(`PART ${this.name}`);
   }
 
-  addEventListener<K extends ChannelEventType>(
+  setEventListener<K extends ChannelEventType>(
     event: K,
-    listener: (data: ChannelEventMap[K]) => void
+    listener: (data: ChannelEventMap[K]) => void,
   ): void {
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, []);
-    }
-    this.listeners.get(event)!.push(listener);
+    this.listeners.set(event, listener);
   }
 
-  removeEventListener<K extends ChannelEventType>(
+  removeEventListener<K extends ChannelEventType>(event: K): void {
+    this.listeners.delete(event);
+  }
+
+  dispatchEvent<K extends ChannelEventType>(
     event: K,
-    listener: (data: ChannelEventMap[K]) => void
+    data: ChannelEventMap[K],
   ): void {
-    const eventListeners = this.listeners.get(event);
-    if (eventListeners) {
-      const index = eventListeners.indexOf(listener);
-      if (index > -1) {
-        eventListeners.splice(index, 1);
-      }
-    }
-  }
-
-  dispatchEvent<K extends ChannelEventType>(event: K, data: ChannelEventMap[K]): void {
-    const eventListeners = this.listeners.get(event);
-    if (eventListeners) {
-      eventListeners.forEach((listener) => listener(data));
+    const listener = this.listeners.get(event);
+    if (listener) {
+      listener(data);
     }
   }
 }
