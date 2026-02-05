@@ -7,10 +7,8 @@ import { useTwitchAPI } from "./hooks/useTwitchAPI.ts";
 function App() {
   const twitch = useTwitchCtx();
 
-  // for it's useEffect to initialize TwitchAPI once
-  // a clientID and token is detected
   useTwitchAPI();
-
+  console.log({ twitch });
   if (!twitch.clientID) {
     return <ClientIDPage />;
   }

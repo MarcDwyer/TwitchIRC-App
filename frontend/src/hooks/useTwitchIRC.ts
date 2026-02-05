@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { TwitchIRC } from "../lib/irc/irc.ts";
 import { useTwitchCtx } from "../context/twitchctx.tsx";
 
-type IRCConnectionState = "disconnected" | "pending" | "authenticated";
+export type IRCConnectionState = "disconnected" | "pending" | "authenticated";
 
-export function useTwitchIRC() {
+export function useTwitchIRC(): [TwitchIRC | null, IRCConnectionState] {
   const [twitchIRC, setTwitchIRC] = useState<TwitchIRC | null>(null);
   const [connectionState, setConnectionState] = useState<IRCConnectionState>(
     "disconnected",
@@ -14,29 +14,33 @@ export function useTwitchIRC() {
 
   useEffect(() => {
     if (
-      !twitchAPI || !oauth.token || twitchIRC ||
-      connectionState === "authenticated"
+      !twitchIRC && oauth.validated && oauth.token && twitchAPI
     ) {
-      return;
-    }
-
-    const irc = new TwitchIRC(oauth.token, twitchAPI.userInfo.login);
-
-    setConnectionState("pending");
-
-    irc.setEventListener("authenticated", () => {
-      setConnectionState("authenticated");
+      const irc = new TwitchIRC(oauth.token, twitchAPI.userInfo.login);
       setTwitchIRC(irc);
-    });
+    }
+  }, [oauth, twitchAPI, twitchIRC]);
 
-    irc.connect();
+  useEffect(() => {
+    if (!twitchIRC) return;
+    (async () => {
+      try {
+        setConnectionState("pending");
+        await twitchIRC.connect();
+        setConnectionState("authenticated");
+      } catch (err) {
+        console.error(err);
+      }
+    })();
 
-    return () => {
-      irc.disconnect();
-      setTwitchIRC(null);
-      setConnectionState("disconnected");
+    return function () {
+      console.log("RAN RAN RAN");
+      if (twitchIRC) {
+        console.log("disconnected");
+        twitchIRC.disconnect();
+      }
     };
-  }, [oauth.token, twitchAPI, twitchIRC, connectionState]);
+  }, [twitchIRC]);
 
-  return { twitchIRC, connectionState };
+  return [twitchIRC, connectionState];
 }

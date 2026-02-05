@@ -14,7 +14,8 @@ export class TwitchIRC {
   private ws: WebSocket | null = null;
   private oauthToken: string;
   private username: string;
-  private eventListeners: Map<IRCEventType, IRCEventCallback<any>> = new Map();
+  private eventListeners: Map<IRCEventType, IRCEventCallback<any>[]> =
+    new Map();
   public channels: Map<string, Channel> = new Map();
 
   constructor(oauthToken: string, username: string) {
@@ -22,47 +23,64 @@ export class TwitchIRC {
     this.username = username;
   }
 
-  setEventListener<T extends IRCEventType>(
+  addEventListener<T extends IRCEventType>(
     event: T,
     callback: IRCEventCallback<IRCEventDataMap[T]>,
   ): void {
-    this.eventListeners.set(event, callback);
+    const listeners = this.eventListeners.get(event) || [];
+    listeners.push(callback);
+    this.eventListeners.set(event, listeners);
   }
 
-  removeEventListener<T extends IRCEventType>(event: T): void {
-    this.eventListeners.delete(event);
+  removeEventListener<T extends IRCEventType>(
+    event: T,
+    callback: IRCEventCallback<IRCEventDataMap[T]>,
+  ): void {
+    const listeners = this.eventListeners.get(event);
+    if (listeners) {
+      this.eventListeners.set(
+        event,
+        listeners.filter((cb) => cb !== callback),
+      );
+    }
   }
 
   private dispatchEvent<T extends IRCEventType>(
     event: T,
     data?: IRCEventDataMap[T],
   ): void {
-    const callback = this.eventListeners.get(event);
-    if (callback) {
-      callback(data);
+    const listeners = this.eventListeners.get(event);
+    if (listeners) {
+      listeners.forEach((callback) => callback(data));
     }
   }
 
-  connect(): void {
-    const ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
-    this.ws = ws;
+  connect(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const ws = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
+      this.ws = ws;
 
-    this.ws.onopen = () => {
-      console.log("Connected to Twitch IRC");
-      this.authenticate();
-    };
+      this.ws.onopen = () => {
+        console.log("Connected to Twitch IRC");
+        this.authenticate();
+      };
 
-    this.ws.onmessage = (event) => {
-      this.handleMessage(event.data, ws);
-    };
+      this.ws.onmessage = (event) => {
+        if (event.data.includes("001")) {
+          resolve();
+        }
+        this.handleMessage(event.data, ws);
+      };
 
-    this.ws.onerror = (error) => {
-      console.error("WebSocket error:", error);
-    };
+      this.ws.onerror = (error) => {
+        console.error("WebSocket error:", error);
+        reject(error);
+      };
 
-    this.ws.onclose = () => {
-      console.log("Disconnected from Twitch IRC");
-    };
+      this.ws.onclose = () => {
+        console.log("Disconnected from Twitch IRC");
+      };
+    });
   }
 
   private authenticate(): void {
@@ -128,6 +146,7 @@ export class TwitchIRC {
       if (match) {
         const [, username, channelName] = match;
         // Part event handling can be added here if needed
+        this.channels.delete(channelName);
       }
     }
 

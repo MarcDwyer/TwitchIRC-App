@@ -4,6 +4,7 @@ import {
   ReactNode,
   SetStateAction,
   useContext,
+  useEffect,
   useState,
 } from "react";
 import { CLIENT_ID_KEY, OAUTH_KEY } from "../util/storageKeys.ts";
@@ -24,12 +25,12 @@ export type TwitchContextType = {
   _setClientID: Dispatch<SetStateAction<string | null>>;
 };
 const InitialOAuth = {
-  token: localStorage.getItem(OAUTH_KEY),
+  token: null,
   validated: false,
   error: null,
 };
 const InitialTwitchState: TwitchContextType = {
-  clientID: localStorage.getItem(CLIENT_ID_KEY),
+  clientID: null,
   oauth: InitialOAuth,
   twitchAPI: null,
   _setTwitchAPI: () => {},
@@ -50,6 +51,12 @@ export const TwitchProvider = ({
   const [oauth, _setOAuth] = useState<OAuth>(InitialOAuth);
   const [twitchAPI, _setTwitchAPI] = useState<TwitchAPI | null>(null);
 
+  useEffect(() => {
+    const lsClientID = localStorage.getItem(CLIENT_ID_KEY);
+    const lsToken = localStorage.getItem(OAUTH_KEY);
+    if (lsClientID && !clientID) _setClientID(lsClientID);
+    if (lsToken && !lsToken) _setOAuth({ ...oauth, token: lsToken });
+  }, [_setClientID, _setOAuth, clientID, oauth]);
   return (
     <TwitchContext.Provider
       value={{

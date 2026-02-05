@@ -1,25 +1,35 @@
 @import "tailwindcss";
 
-/* Custom scrollbar styles */
-::-webkit-scrollbar {
+/* Hide scrollbar utility */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Custom scrollbar styles - scoped to exclude .scrollbar-hide */
+:not(.scrollbar-hide)::-webkit-scrollbar {
     width: 8px;
 }
 
-::-webkit-scrollbar-track {
+:not(.scrollbar-hide)::-webkit-scrollbar-track {
     background: transparent;
 }
 
-::-webkit-scrollbar-thumb {
+:not(.scrollbar-hide)::-webkit-scrollbar-thumb {
     background: #3f3f46;
     border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+:not(.scrollbar-hide)::-webkit-scrollbar-thumb:hover {
     background: #52525b;
 }
 
 /* Firefox scrollbar */
-* {
+:not(.scrollbar-hide) {
     scrollbar-width: thin;
     scrollbar-color: #3f3f46 transparent;
 }

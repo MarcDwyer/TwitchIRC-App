@@ -5,76 +5,78 @@ import { Following } from "../components/Following.tsx";
 import { Navbar } from "../components/Navbar.tsx";
 import { useTwitchCtx } from "../context/twitchctx.tsx";
 import { useOAuth } from "../hooks/useOAuth.ts";
-import { Joined } from "./Joined.tsx";
+import { InteractivePlayer } from "./InteractivePlayer/InteractivePlayer.tsx";
 
 export function Dashboard() {
   const twitch = useTwitchCtx();
-  const [showJoined, setShowJoined] = useState<boolean>(false);
+  const [showInter, setShowInter] = useState<boolean>(false);
 
   const { oauth } = useOAuth();
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-900">
+    <div className="h-screen flex flex-col bg-zinc-900 overflow-hidden">
       <Navbar />
-      {showJoined ? <Joined /> : (
-        <main className="flex-1 p-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="bg-zinc-800 rounded-lg p-6 mb-6">
-              <h2 className="text-xl font-semibold text-zinc-100 mb-4">
-                Welcome to your Dashboard
-              </h2>
-              <p className="text-zinc-400 flex items-center gap-2">
-                Client ID: <BlurredText text={twitch.clientID ?? ""} />
-                <CopyButton text={twitch.clientID ?? ""} />
-              </p>
-              <p className="text-zinc-400 mt-2 flex items-center gap-2">
-                OAuth Token: <BlurredText text={oauth.token ?? ""} />
-                <CopyButton text={oauth.token ?? ""} />
-              </p>
+      {showInter
+        ? <InteractivePlayer />
+        : (
+          <main className="flex-1 p-8 overflow-y-auto min-h-0">
+            <div className="max-w-7xl mx-auto">
+              <div className="bg-zinc-800 rounded-lg p-6 mb-6">
+                <h2 className="text-xl font-semibold text-zinc-100 mb-4">
+                  Welcome to your Dashboard
+                </h2>
+                <p className="text-zinc-400 flex items-center gap-2">
+                  Client ID: <BlurredText text={twitch.clientID ?? ""} />
+                  <CopyButton text={twitch.clientID ?? ""} />
+                </p>
+                <p className="text-zinc-400 mt-2 flex items-center gap-2">
+                  OAuth Token: <BlurredText text={oauth.token ?? ""} />
+                  <CopyButton text={oauth.token ?? ""} />
+                </p>
+              </div>
+              <div className="mb-6">
+                <Following />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div
+                  className="bg-zinc-800 rounded-lg p-6 border border-zinc-700 cursor-pointer transition-colors hover:bg-zinc-700 hover:border-zinc-600"
+                  onClick={() => setShowInter(true)}
+                >
+                  <h3 className="text-lg font-medium text-zinc-100 mb-2">
+                    Join Following
+                  </h3>
+                  <p className="text-zinc-400 text-sm">
+                    Join all your following's chat.
+                  </p>
+                </div>
+                <div className="bg-zinc-800 rounded-lg p-6 border border-zinc-700 cursor-pointer transition-colors hover:bg-zinc-700 hover:border-zinc-600">
+                  <h3 className="text-lg font-medium text-zinc-100 mb-2">
+                    Streams
+                  </h3>
+                  <p className="text-zinc-400 text-sm">
+                    View and manage your streams
+                  </p>
+                </div>
+                <div className="bg-zinc-800 rounded-lg p-6 border border-zinc-700 cursor-pointer transition-colors hover:bg-zinc-700 hover:border-zinc-600">
+                  <h3 className="text-lg font-medium text-zinc-100 mb-2">
+                    Analytics
+                  </h3>
+                  <p className="text-zinc-400 text-sm">
+                    Track your channel performance
+                  </p>
+                </div>
+                <div className="bg-zinc-800 rounded-lg p-6 border border-zinc-700 cursor-pointer transition-colors hover:bg-zinc-700 hover:border-zinc-600">
+                  <h3 className="text-lg font-medium text-zinc-100 mb-2">
+                    Settings
+                  </h3>
+                  <p className="text-zinc-400 text-sm">
+                    Configure your preferences
+                  </p>
+                </div>
+              </div>
             </div>
-            <div className="mb-6">
-              <Following />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div
-                className="bg-zinc-800 rounded-lg p-6 border border-zinc-700 cursor-pointer transition-colors hover:bg-zinc-700 hover:border-zinc-600"
-                onClick={() => setShowJoined(true)}
-              >
-                <h3 className="text-lg font-medium text-zinc-100 mb-2">
-                  Join Following
-                </h3>
-                <p className="text-zinc-400 text-sm">
-                  Join all your following's chat.
-                </p>
-              </div>
-              <div className="bg-zinc-800 rounded-lg p-6 border border-zinc-700 cursor-pointer transition-colors hover:bg-zinc-700 hover:border-zinc-600">
-                <h3 className="text-lg font-medium text-zinc-100 mb-2">
-                  Streams
-                </h3>
-                <p className="text-zinc-400 text-sm">
-                  View and manage your streams
-                </p>
-              </div>
-              <div className="bg-zinc-800 rounded-lg p-6 border border-zinc-700 cursor-pointer transition-colors hover:bg-zinc-700 hover:border-zinc-600">
-                <h3 className="text-lg font-medium text-zinc-100 mb-2">
-                  Analytics
-                </h3>
-                <p className="text-zinc-400 text-sm">
-                  Track your channel performance
-                </p>
-              </div>
-              <div className="bg-zinc-800 rounded-lg p-6 border border-zinc-700 cursor-pointer transition-colors hover:bg-zinc-700 hover:border-zinc-600">
-                <h3 className="text-lg font-medium text-zinc-100 mb-2">
-                  Settings
-                </h3>
-                <p className="text-zinc-400 text-sm">
-                  Configure your preferences
-                </p>
-              </div>
-            </div>
-          </div>
-        </main>
-      )}
+          </main>
+        )}
     </div>
   );
 }
