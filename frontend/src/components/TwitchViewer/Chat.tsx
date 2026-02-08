@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useAutocomplete } from "../../hooks/useAutocomplete.ts";
 import { useChat } from "../../hooks/useChat.ts";
 import { BroadcastHandler } from "../../pages/Dashboard/Dashboard.tsx";
 
@@ -13,6 +14,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
   const { messages, send, isMentioned } = useChat(ws, channel);
   const chatRef = useRef<HTMLDivElement>(null);
   const [paused, setPaused] = useState(false);
+  const autocomplete = useAutocomplete(input, messages);
 
   useEffect(() => {
     const funcRef = (msg: string) => {
@@ -79,22 +81,50 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
           Chat paused. Click to resume.
         </button>
       )}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          send(input, true);
-          setInput("");
-        }}
-        className="px-3 py-2 border-t border-zinc-700"
-      >
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Send a message"
-          className="w-full bg-zinc-700 text-zinc-100 placeholder-zinc-500 text-sm rounded px-3 py-1.5 outline-none focus:ring-1 focus:ring-purple-500"
-        />
-      </form>
+      <div className="relative px-3 py-2 border-t border-zinc-700">
+        {autocomplete.active && (
+          <div className="absolute bottom-full left-0 right-0 mx-3 mb-1 bg-zinc-800 border border-zinc-600 rounded shadow-lg max-h-40 overflow-y-auto">
+            {autocomplete.suggestions.map((user, i) => (
+              <button
+                key={user}
+                type="button"
+                onMouseDown={(e) => {
+                  e.preventDefault();
+                  const result = autocomplete.complete(i);
+                  if (result) setInput(result);
+                }}
+                className={`w-full text-left px-3 py-1.5 text-sm cursor-pointer ${
+                  i === autocomplete.selectedIndex
+                    ? "bg-purple-600 text-white"
+                    : "text-zinc-300 hover:bg-zinc-700"
+                }`}
+              >
+                {user}
+              </button>
+            ))}
+          </div>
+        )}
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (autocomplete.active) return;
+            send(input, true);
+            setInput("");
+          }}
+        >
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              const result = autocomplete.onKeyDown(e);
+              if (result) setInput(result);
+            }}
+            placeholder="Send a message"
+            className="w-full bg-zinc-700 text-zinc-100 placeholder-zinc-500 text-sm rounded px-3 py-1.5 outline-none focus:ring-1 focus:ring-purple-500"
+          />
+        </form>
+      </div>
     </div>
   );
 }

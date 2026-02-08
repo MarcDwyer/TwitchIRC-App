@@ -11,16 +11,15 @@ export function useTwitchIRC() {
 
   const connect = useCallback(() => {
     const tmpWs = new WebSocket("wss://irc-ws.chat.twitch.tv:443");
-
     tmpWs.onopen = () => {
       if (!oauth.token || !twitchAPI) {
         throw new Error("No token or twitchAPI not created");
       }
-
       setStatus("pending");
       tmpWs.send("CAP REQ :twitch.tv/tags");
       tmpWs.send(`PASS oauth:${oauth.token}`);
       tmpWs.send(`NICK ${twitchAPI.userInfo.login}`);
+
       setWs(tmpWs);
     };
   }, [setWs, oauth, twitchAPI, setStatus]);
@@ -43,12 +42,12 @@ export function useTwitchIRC() {
       console.log("Disconnected from Twitch IRC");
       setStatus("disconnected");
     });
-  }, [ws]);
+  }, [ws, connect]);
 
   useEffect(() => {
     if (status === "disconnected") connect();
   }, [connect, status]);
-
+  console.log({ status });
   return {
     connect,
     status,
