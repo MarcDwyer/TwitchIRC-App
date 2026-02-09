@@ -7,7 +7,6 @@ import { useTwitchAPI } from "./hooks/useTwitchAPI.ts";
 function App() {
   const twitch = useTwitchCtx();
   useTwitchAPI();
-  console.log({ twitch });
   if (!twitch.clientID) {
     return <ClientIDPage />;
   }

@@ -54,7 +54,6 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
       >
         {messages.map((msg, i) => {
           const mentioned = isMentioned(msg);
-          console.log({ msg });
           return (
             <div
               key={i}

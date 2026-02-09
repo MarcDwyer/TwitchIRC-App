@@ -35,8 +35,7 @@ export function setBadges(badges: string, badgeRec: Badges) {
       badge += char;
     } else {
       if (badge.length) {
-        //@ts-ignore
-        badgeRec[badge] = true;
+        (badgeRec as Record<string, boolean>)[badge] = true;
       }
       badge = "";
     }

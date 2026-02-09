@@ -1,4 +1,4 @@
-import { Commands, IrcMessage } from "../types/twitch_data.ts";
+import { Commands, IrcMessage, KeyOfCommands, Tags } from "../types/twitch_data.ts";
 import { createBadgeObj, setBadges, removeBreaks } from "./parcer_util.ts";
 
 /*
@@ -48,8 +48,7 @@ export function msgParcer(data: string) {
   const message: IrcMessage = {
     raw: data,
     badges: createBadgeObj(),
-    //@ts-ignore
-    tags: {},
+    tags: {} as Tags,
     prefix: "",
     command: Commands.NONE,
     params: [],
@@ -82,8 +81,7 @@ export function msgParcer(data: string) {
       if (k === "badges") {
         setBadges(v, message.badges);
       }
-      //@ts-ignore
-      message.tags[k] = v;
+      (message.tags as Record<string, string>)[k] = v;
     }
 
     position = nextspace + 1;
@@ -118,8 +116,7 @@ export function msgParcer(data: string) {
   // current position to the end of the string as the command..
   if (nextspace === -1) {
     if (data.length > position) {
-      //@ts-ignore
-      message.command = data.slice(position);
+      message.command = data.slice(position) as KeyOfCommands;
       return message;
     }
 
@@ -128,8 +125,7 @@ export function msgParcer(data: string) {
 
   // Else, the command is the current position up to the next space. After
   // that, we expect some parameters.
-  //@ts-ignore
-  message.command = data.slice(position, nextspace);
+  message.command = data.slice(position, nextspace) as KeyOfCommands;
 
   position = nextspace + 1;
 

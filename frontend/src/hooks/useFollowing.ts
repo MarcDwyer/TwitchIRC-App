@@ -8,7 +8,6 @@ export function useFollowing() {
 
   const getFollowing = useCallback(() => {
     if (!twitchAPI) return;
-    console.log("ref followers");
     twitchAPI
       ?.getLiveFollowedChannels()
       .then((resp) => setFollowing(resp.data));

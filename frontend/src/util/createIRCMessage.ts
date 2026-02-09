@@ -5,6 +5,7 @@ export function createIRCMessage(
   message: string,
   channel: string,
   username: string,
+  ircMsg: Partial<IrcMessage> = {},
 ): IrcMessage {
   return {
     raw: "",
@@ -16,5 +17,6 @@ export function createIRCMessage(
     channel,
     message,
     username,
+    ...ircMsg,
   };
 }

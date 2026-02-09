@@ -1,9 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { handleMessage } from "../util/handleMessage.ts";
+import { handleChannelMsg, HandleMsgCallbacks } from "../util/handleMessage.ts";
 import { useUserInfo } from "./useUserInfo.ts";
 import { delay } from "../util/delay.ts";
 import { createIRCMessage } from "../util/createIRCMessage.ts";
 import { IrcMessage } from "../types/twitch_data.ts";
+
+const addUserState = (msg: IrcMessage, userState: IrcMessage | null) => {
+  if (!userState) return msg;
+  Object.assign(msg, { tags: userState.tags });
+};
 
 export function useChat(ws: WebSocket, channel: string) {
   const [messages, setMessages] = useState<IrcMessage[]>([]);
@@ -13,6 +18,8 @@ export function useChat(ws: WebSocket, channel: string) {
 
   const queue = useRef<IrcMessage[]>([]);
   const throttling = useRef<boolean>(false);
+
+  const userState = useRef<IrcMessage | null>(null);
 
   const throttleMsgs = useCallback(async () => {
     throttling.current = true;
@@ -42,7 +49,7 @@ export function useChat(ws: WebSocket, channel: string) {
         channel,
         userInfo.display_name ?? "",
       );
-
+      addUserState(ircMsg, userState.current);
       setMessages((prev) => [...prev, ircMsg]);
       if (broadcast) {
         ws.send(`PRIVMSG ${channel} :${msg}`);
@@ -52,24 +59,27 @@ export function useChat(ws: WebSocket, channel: string) {
   );
   useEffect(() => {
     const ref = ({ data }: MessageEvent<string>) => {
-      handleMessage(data, {
+      const cbs: HandleMsgCallbacks = {
         PRIVMSG: (msg) => {
-          if (msg && msg.channel === channel) {
-            queue.current.push(msg);
-            if (!throttling.current) throttleMsgs();
-          }
+          queue.current.push(msg);
+          if (!throttling.current) throttleMsgs();
         },
-        JOIN: (chanName) => {
-          if (chanName === channel) setJoined(true);
+        USERSTATE: (ircMsg) => {
+          console.log({ userState: ircMsg });
+          userState.current = ircMsg;
         },
-      });
+        JOIN: () => {
+          setJoined(true);
+        },
+      };
+      handleChannelMsg({ data, channel, cbs });
     };
     ws.addEventListener("message", ref);
 
     return function () {
       ws.removeEventListener("message", ref);
     };
-  }, [ws, channel, throttleMsgs, throttling]);
+  }, [ws, channel, throttleMsgs, setJoined]);
 
   useEffect(() => {
     if (!joined) {

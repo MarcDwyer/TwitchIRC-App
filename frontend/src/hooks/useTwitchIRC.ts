@@ -16,7 +16,9 @@ export function useTwitchIRC() {
         throw new Error("No token or twitchAPI not created");
       }
       setStatus("pending");
-      tmpWs.send("CAP REQ :twitch.tv/tags");
+      tmpWs.send(
+        "CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership",
+      );
       tmpWs.send(`PASS oauth:${oauth.token}`);
       tmpWs.send(`NICK ${twitchAPI.userInfo.login}`);
 
@@ -39,7 +41,6 @@ export function useTwitchIRC() {
     });
     ws.addEventListener("close", (err) => {
       console.log("IRC:", { err });
-      console.log("Disconnected from Twitch IRC");
       setStatus("disconnected");
     });
   }, [ws, connect]);
@@ -47,7 +48,6 @@ export function useTwitchIRC() {
   useEffect(() => {
     if (status === "disconnected") connect();
   }, [connect, status]);
-  console.log({ status });
   return {
     connect,
     status,
