@@ -12,18 +12,16 @@ export function useChat(ws: WebSocket, channel: string) {
 
   const queue = useRef<PrivMsgEvt[]>([]);
 
-  const deferUpdate = useCallback(async () => {
+  const throttleMsgs = useCallback(async () => {
     setUpdating(true);
-    const scan = async () => {
+    const throttle = async () => {
       while (queue.current.length) {
-        console.log(queue.current);
-        const firstFive = queue.current.splice(0, 10);
-        setMessages((prev) => [...prev, ...firstFive]);
+        const snippet = queue.current.splice(0, 10);
+        setMessages((prev) => [...prev, ...snippet]);
         await delay(750);
       }
     };
-    await scan();
-    console.log("scan completed");
+    await throttle();
     setUpdating(false);
   }, [setMessages, setUpdating]);
 
@@ -49,7 +47,7 @@ export function useChat(ws: WebSocket, channel: string) {
         PRIVMSG: (msg) => {
           if (msg.channel === channel) {
             queue.current.push(msg);
-            if (!updating) deferUpdate();
+            if (!updating) throttleMsgs();
           }
         },
         JOIN: (chanName) => {
@@ -62,7 +60,7 @@ export function useChat(ws: WebSocket, channel: string) {
     return function () {
       ws.removeEventListener("message", ref);
     };
-  }, [ws, channel, deferUpdate, updating]);
+  }, [ws, channel, throttleMsgs, updating]);
 
   useEffect(() => {
     if (!joined) {
