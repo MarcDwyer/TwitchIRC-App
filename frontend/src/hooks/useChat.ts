@@ -1,11 +1,31 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { handleMessage, PrivMsgEvt } from "../util/handleMessage.ts";
 import { useUserInfo } from "./useUserInfo.ts";
+import { delay } from "../util/delay.ts";
 
 export function useChat(ws: WebSocket, channel: string) {
   const [messages, setMessages] = useState<PrivMsgEvt[]>([]);
   const [joined, setJoined] = useState<boolean>(false);
+  const [updating, setUpdating] = useState<boolean>(false);
+
   const userInfo = useUserInfo();
+
+  const queue = useRef<PrivMsgEvt[]>([]);
+
+  const deferUpdate = useCallback(async () => {
+    setUpdating(true);
+    const scan = async () => {
+      while (queue.current.length) {
+        console.log(queue.current);
+        const firstFive = queue.current.splice(0, 10);
+        setMessages((prev) => [...prev, ...firstFive]);
+        await delay(750);
+      }
+    };
+    await scan();
+    console.log("scan completed");
+    setUpdating(false);
+  }, [setMessages, setUpdating]);
 
   const send = useCallback(
     (msg: string, broadcast: boolean) => {
@@ -16,29 +36,33 @@ export function useChat(ws: WebSocket, channel: string) {
         message: msg,
         channel,
       };
-      setMessages([...messages, privMsg]);
+      setMessages((prev) => [...prev, privMsg]);
       if (broadcast) {
         ws.send(`PRIVMSG ${channel} :${msg}`);
       }
     },
-    [setMessages, ws, userInfo, messages, channel],
+    [ws, userInfo, channel, setMessages],
   );
   useEffect(() => {
-    const ref = ({ data }: MessageEvent<string>) =>
+    const ref = ({ data }: MessageEvent<string>) => {
       handleMessage(data, {
         PRIVMSG: (msg) => {
-          if (msg.channel === channel) setMessages([...messages, msg]);
+          if (msg.channel === channel) {
+            queue.current.push(msg);
+            if (!updating) deferUpdate();
+          }
         },
         JOIN: (chanName) => {
           if (chanName === channel) setJoined(true);
         },
       });
+    };
     ws.addEventListener("message", ref);
 
     return function () {
       ws.removeEventListener("message", ref);
     };
-  }, [ws, channel, setJoined, setMessages, messages]);
+  }, [ws, channel, deferUpdate, updating]);
 
   useEffect(() => {
     if (!joined) {
@@ -55,7 +79,7 @@ export function useChat(ws: WebSocket, channel: string) {
     },
     [userInfo],
   );
-
+  console.log({ updating });
   return {
     channel,
     messages,
