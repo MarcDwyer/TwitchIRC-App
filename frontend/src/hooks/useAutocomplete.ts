@@ -1,88 +1,39 @@
 import { useCallback, useMemo, useState } from "react";
-import { PrivMsgEvt } from "../util/handleMessage.ts";
+import { IrcMessage } from "../types/twitch_data.ts";
+import { CheckAutoCompleteReturn } from "../util/autcomplete.ts";
 
-export function useAutocomplete(input: string, messages: PrivMsgEvt[]) {
-  const [arrowOffset, setArrowOffset] = useState(0);
-
-  const users = useMemo(() => {
-    const seen = new Set<string>();
-    for (const msg of messages) {
-      seen.add(msg.username);
-    }
-    return [...seen];
-  }, [messages]);
-
-  const { active, suggestions, atIndex } = useMemo(() => {
-    const lastAt = input.lastIndexOf("@");
-    if (lastAt === -1 || (lastAt > 0 && input[lastAt - 1] !== " ")) {
-      return { active: false, suggestions: [] as string[], atIndex: -1 };
-    }
-
-    const query = input.slice(lastAt + 1);
-    if (query.includes(" ")) {
-      return { active: false, suggestions: [] as string[], atIndex: -1 };
-    }
-
-    const filtered = users.filter((u) =>
-      u.toLowerCase().startsWith(query.toLowerCase()),
-    );
-
-    return {
-      active: filtered.length > 0,
-      suggestions: filtered,
-      atIndex: lastAt,
-    };
-  }, [input, users]);
-
-  const selectedIndex =
-    suggestions.length > 0
-      ? ((arrowOffset % suggestions.length) + suggestions.length) %
-        suggestions.length
-      : 0;
-
-  const complete = useCallback(
-    (index?: number) => {
-      if (!active || suggestions.length === 0) return null;
-      const selected = suggestions[index ?? selectedIndex] ?? suggestions[0];
-      return input.slice(0, atIndex) + `@${selected} `;
-    },
-    [active, suggestions, selectedIndex, input, atIndex],
-  );
-
-  const onKeyDown = useCallback(
-    (e: React.KeyboardEvent): string | null => {
-      if (!active) return null;
-
-      switch (e.key) {
-        case "ArrowUp":
-          e.preventDefault();
-          setArrowOffset((prev) => prev - 1);
-          return null;
-        case "ArrowDown":
-          e.preventDefault();
-          setArrowOffset((prev) => prev + 1);
-          return null;
-        case "Tab":
-        case "Enter":
-          e.preventDefault();
-          setArrowOffset(0);
-          return complete();
-        case "Escape":
-          e.preventDefault();
-          setArrowOffset(0);
-          return null;
-        default:
-          return null;
+export function useAutocomplete() {
+  const [seen, setSeen] = useState<Set<string>>(new Set());
+  const [autocomplete, setAutoComplete] = useState<CheckAutoCompleteReturn>({
+    isAutoComplete: false,
+    word: "",
+    left: -1,
+    right: -1,
+  });
+  const disableAutoComplete = () =>
+    setAutoComplete({ ...autocomplete, isAutoComplete: false });
+  const updateSeen = useCallback(
+    (newMsgs: IrcMessage[]) => {
+      const updated: Set<string> = new Set(seen);
+      for (const msg of newMsgs) {
+        updated.add(msg.username);
       }
+      setSeen(updated);
     },
-    [active, complete],
+    [seen, setSeen],
   );
+  const filteredUsers: string[] = useMemo(() => {
+    if (!autocomplete.isAutoComplete) return [];
+    return Array.from(seen).filter((username) =>
+      username.startsWith(autocomplete.word),
+    );
+  }, [autocomplete, seen]);
 
+  console.log({ autocomplete });
   return {
-    active,
-    suggestions,
-    selectedIndex,
-    onKeyDown,
-    complete,
+    updateSeen,
+    filteredUsers,
+    setAutoComplete,
+    disableAutoComplete,
   };
 }

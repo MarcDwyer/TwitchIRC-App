@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useChat } from "../../hooks/useChat.ts";
 import { BroadcastHandler } from "../../pages/Dashboard/Dashboard.tsx";
+import { useAutocomplete } from "../../hooks/useAutocomplete.ts";
+import { checkForAutoComplete } from "../../util/autcomplete.ts";
 
 type Props = {
   ws: WebSocket;
@@ -10,10 +12,22 @@ type Props = {
 
 export function Chat({ ws, channel, broadcastHandlers }: Props) {
   const [input, setInput] = useState("");
-  const { messages, send, isMentioned } = useChat(ws, channel);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const { updateSeen, filteredUsers, setAutoComplete, disableAutoComplete } =
+    useAutocomplete();
+
+  useEffect(() => {
+    setSelectedIndex(0);
+  }, [filteredUsers, setSelectedIndex]);
+  const onSelect = (_user: string) => {};
+
   const chatRef = useRef<HTMLDivElement>(null);
+
+  const { messages, send, isMentioned } = useChat(ws, channel, updateSeen);
   const [paused, setPaused] = useState(false);
-  // const autocomplete = useAutocomplete(input, messages);
 
   useEffect(() => {
     const funcRef = (msg: string) => {
@@ -44,7 +58,6 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
     const el = chatRef.current;
     if (el) el.scrollTop = el.scrollHeight;
   }
-
   return (
     <div className="flex flex-col flex-1 min-h-0 relative">
       <div
@@ -81,14 +94,15 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
         </button>
       )}
       <div className="relative px-3 py-2 border-t border-zinc-700">
-        {/* {autocomplete.active && (
+        {filteredUsers.length >= 1 && (
           <div className="absolute bottom-full left-0 right-0 mx-3 mb-1 bg-zinc-800 border border-zinc-600 rounded shadow-lg max-h-40 overflow-y-auto">
-            {autocomplete.suggestions.map((user, i) => (
+            {filteredUsers.map((user, i) => (
               <button
                 key={user}
                 type="button"
+                onClick={() => onSelect(user)}
                 className={`w-full text-left px-3 py-1.5 text-sm cursor-pointer ${
-                  i === autocomplete.selectedIndex
+                  i === selectedIndex
                     ? "bg-purple-600 text-white"
                     : "text-zinc-300 hover:bg-zinc-700"
                 }`}
@@ -97,7 +111,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
               </button>
             ))}
           </div>
-        )} */}
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -106,9 +120,40 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
           }}
         >
           <input
+            ref={inputRef}
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={(e) => {
+              const target = e.target;
+              setInput(target.value);
+              if (target.selectionStart) {
+                const check = checkForAutoComplete(
+                  e.target.value,
+                  target.selectionStart,
+                );
+                setAutoComplete(check);
+              } else {
+                console.log("else");
+                disableAutoComplete();
+              }
+            }}
+            onKeyDown={(e) => {
+              if (filteredUsers.length === 0) return;
+              if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setSelectedIndex((i) => Math.max(0, i - 1));
+              } else if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setSelectedIndex((i) =>
+                  Math.min(filteredUsers.length - 1, i + 1),
+                );
+              } else if (e.key === "Tab" || e.key === "Enter") {
+                e.preventDefault();
+                onSelect(filteredUsers[selectedIndex]);
+              } else if (e.key === "Escape") {
+                setSelectedIndex(0);
+              }
+            }}
             placeholder="Send a message"
             className="w-full bg-zinc-700 text-zinc-100 placeholder-zinc-500 text-sm rounded px-3 py-1.5 outline-none focus:ring-1 focus:ring-purple-500"
           />

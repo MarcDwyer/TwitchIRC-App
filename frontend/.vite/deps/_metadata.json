@@ -2,34 +2,43 @@
   "hash": "eb4beeef",
   "configHash": "fb12031d",
   "lockfileHash": "e3b0c442",
-  "browserHash": "ae3397c2",
+  "browserHash": "4dfc2b18",
   "optimized": {
     "react/jsx-dev-runtime": {
       "src": "../../node_modules/.deno/react@19.2.4/node_modules/react/jsx-dev-runtime.js",
       "file": "react_jsx-dev-runtime.js",
-      "fileHash": "37528f31",
+      "fileHash": "92e7ec94",
       "needsInterop": true
     },
     "react": {
       "src": "../../node_modules/.deno/react@19.2.4/node_modules/react/index.js",
       "file": "react.js",
-      "fileHash": "e8dfd905",
+      "fileHash": "6da2de5e",
       "needsInterop": true
     },
     "react-dom/client": {
       "src": "../../node_modules/.deno/react-dom@19.2.4/node_modules/react-dom/client.js",
       "file": "react-dom_client.js",
-      "fileHash": "760702c8",
+      "fileHash": "929eb2bb",
       "needsInterop": true
     },
     "react/jsx-runtime": {
       "src": "../../node_modules/.deno/react@19.2.4/node_modules/react/jsx-runtime.js",
       "file": "react_jsx-runtime.js",
-      "fileHash": "377da3d6",
+      "fileHash": "61c0e78f",
+      "needsInterop": true
+    },
+    "react-resizable": {
+      "src": "../../node_modules/.deno/react-resizable@3.1.3/node_modules/react-resizable/index.js",
+      "file": "react-resizable.js",
+      "fileHash": "1ce91946",
       "needsInterop": true
     }
   },
   "chunks": {
+    "chunk-N7HOUAH3": {
+      "file": "chunk-N7HOUAH3.js"
+    },
     "chunk-EH6ASJHY": {
       "file": "chunk-EH6ASJHY.js"
     }

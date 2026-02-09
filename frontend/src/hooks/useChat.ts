@@ -10,20 +10,26 @@ const addUserState = (msg: IrcMessage, userState: IrcMessage | null) => {
   Object.assign(msg, { tags: userState.tags });
 };
 
-export function useChat(ws: WebSocket, channel: string) {
+type NewMessagesCB = (msgs: IrcMessage[]) => void;
+export function useChat(
+  ws: WebSocket,
+  channel: string,
+  newMsgsCB: NewMessagesCB,
+) {
   const [messages, setMessages] = useState<IrcMessage[]>([]);
   const [joined, setJoined] = useState<boolean>(false);
 
   const userInfo = useUserInfo();
 
   const queue = useRef<IrcMessage[]>([]);
-  const throttling = useRef<boolean>(false);
+  const batching = useRef<boolean>(false);
 
   const userState = useRef<IrcMessage | null>(null);
 
-  const throttleMsgs = useCallback(async () => {
-    throttling.current = true;
-    const throttle = async () => {
+  const batchMsgs = useCallback(async () => {
+    batching.current = true;
+
+    const batch = async () => {
       while (queue.current.length) {
         const snippet = queue.current.splice(0, 10);
         setMessages((prev) => {
@@ -34,12 +40,13 @@ export function useChat(ws: WebSocket, channel: string) {
           }
           return [...prev, ...snippet];
         });
+        newMsgsCB(snippet);
         await delay(750);
       }
     };
-    await throttle();
-    throttling.current = false;
-  }, [setMessages]);
+    await batch();
+    batching.current = false;
+  }, [setMessages, newMsgsCB]);
 
   const send = useCallback(
     (msg: string, broadcast: boolean) => {
@@ -62,7 +69,7 @@ export function useChat(ws: WebSocket, channel: string) {
       const cbs: HandleMsgCallbacks = {
         PRIVMSG: (msg) => {
           queue.current.push(msg);
-          if (!throttling.current) throttleMsgs();
+          if (!batching.current) batchMsgs();
         },
         USERSTATE: (ircMsg) => {
           console.log({ userState: ircMsg });
@@ -79,7 +86,7 @@ export function useChat(ws: WebSocket, channel: string) {
     return function () {
       ws.removeEventListener("message", ref);
     };
-  }, [ws, channel, throttleMsgs, setJoined]);
+  }, [ws, channel, batchMsgs, setJoined]);
 
   useEffect(() => {
     if (!joined) {
