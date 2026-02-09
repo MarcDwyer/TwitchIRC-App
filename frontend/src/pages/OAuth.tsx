@@ -21,13 +21,13 @@ export function OAuthPage() {
     if (!oauth.token) {
       checkURLForToken();
     }
-  }, [oauth.token]);
+  }, [oauth.token, checkURLForToken]);
 
   useEffect(() => {
     if (oauth.token && !oauth.validated) {
       validateToken();
     }
-  }, [oauth]);
+  }, [oauth, validateToken]);
 
   const handleGenerateToken = () => {
     const state = generateState();
@@ -41,8 +41,7 @@ export function OAuthPage() {
       state: state,
     });
 
-    const authUrl =
-      `https://id.twitch.tv/oauth2/authorize?${params.toString()}`;
+    const authUrl = `https://id.twitch.tv/oauth2/authorize?${params.toString()}`;
     location.href = authUrl;
   };
 

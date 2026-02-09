@@ -8,29 +8,27 @@ export function useFollowing() {
 
   const getFollowing = useCallback(() => {
     if (!twitchAPI) return;
+    console.log("ref followers");
     twitchAPI
       ?.getLiveFollowedChannels()
       .then((resp) => setFollowing(resp.data));
   }, [twitchAPI, setFollowing]);
 
   useEffect(() => {
-    if (!following && twitchAPI) {
+    if (!following) {
       getFollowing();
     }
   }, [following, getFollowing]);
 
   useEffect(() => {
-    let interval: number;
-    if (twitchAPI) {
-      interval = setInterval(getFollowing, 5 * 60 * 1000);
+    let refresh: number;
+    if (following) {
+      refresh = setInterval(getFollowing, 1000 * 10 * 3);
     }
     return function () {
-      if (interval) {
-        clearInterval(interval);
-        console.log("cleared following");
-      }
+      if (refresh) clearInterval(refresh);
     };
-  }, [getFollowing]);
+  }, [getFollowing, following]);
 
   return following;
 }
