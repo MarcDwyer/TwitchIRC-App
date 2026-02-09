@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useAutocomplete } from "../../hooks/useAutocomplete.ts";
 import { useChat } from "../../hooks/useChat.ts";
 import { BroadcastHandler } from "../../pages/Dashboard/Dashboard.tsx";
 
@@ -55,6 +54,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
       >
         {messages.map((msg, i) => {
           const mentioned = isMentioned(msg);
+          console.log({ msg });
           return (
             <div
               key={i}
@@ -62,7 +62,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
             >
               <span
                 className="font-semibold"
-                style={{ color: msg.color || "#a78bfa" }}
+                style={{ color: msg.tags["color"] ?? "#a78bfa" }}
               >
                 {msg.username}
               </span>

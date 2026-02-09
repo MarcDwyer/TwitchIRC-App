@@ -1,3 +1,6 @@
+import { IrcMessage } from "../types/twitch_data.ts";
+import { msgParcer } from "./msgParcer.ts";
+
 export type PrivMsgEvt = {
   message: string;
   username: string;
@@ -6,23 +9,12 @@ export type PrivMsgEvt = {
 };
 
 export type HandleMsgCallbacks = {
-  PRIVMSG?: (msg: PrivMsgEvt) => void;
+  PRIVMSG?: (msg: IrcMessage | null) => void;
   JOIN?: (channelName: string) => void;
   PART?: () => void;
   "001"?: () => void;
   PING?: () => void;
 };
-
-function parseTags(tagStr: string): Record<string, string> {
-  const tags: Record<string, string> = {};
-  for (const part of tagStr.split(";")) {
-    const eq = part.indexOf("=");
-    if (eq !== -1) {
-      tags[part.slice(0, eq)] = part.slice(eq + 1);
-    }
-  }
-  return tags;
-}
 
 export function getCommand(line: string): keyof HandleMsgCallbacks {
   if (line.startsWith("PING")) return "PING";
@@ -46,20 +38,22 @@ export function handleMessage(
     }
     switch (command) {
       case "PRIVMSG": {
-        const match = line.match(
-          /(?:@(\S+) )?:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG (#\w+) :(.+)/,
-        );
-        if (match) {
-          const [, tagStr, username, channel, message] = match;
-          const tags = tagStr ? parseTags(tagStr) : {};
-          const msg: PrivMsgEvt = {
-            username: tags["display-name"] || username,
-            message,
-            channel,
-            color: tags["color"] || undefined,
-          };
-          cbs.PRIVMSG?.(msg);
-        }
+        const ircMsg = msgParcer(data);
+        cbs[command](ircMsg);
+        // const match = line.match(
+        //   /(?:@(\S+) )?:(\w+)!\w+@\w+\.tmi\.twitch\.tv PRIVMSG (#\w+) :(.+)/,
+        // );
+        // if (match) {
+        //   const [, tagStr, username, channel, message] = match;
+        //   const tags = tagStr ? parseTags(tagStr) : {};
+        //   const msg: PrivMsgEvt = {
+        //     username: tags["display-name"] || username,
+        //     message,
+        //     channel,
+        //     color: tags["color"] || undefined,
+        //   };
+        //   cbs.PRIVMSG?.(msg);
+        // }
         break;
       }
       case "JOIN":

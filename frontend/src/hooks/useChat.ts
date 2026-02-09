@@ -1,19 +1,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { handleMessage, PrivMsgEvt } from "../util/handleMessage.ts";
+import { handleMessage } from "../util/handleMessage.ts";
 import { useUserInfo } from "./useUserInfo.ts";
 import { delay } from "../util/delay.ts";
+import { createIRCMessage } from "../util/createIRCMessage.ts";
+import { IrcMessage } from "../types/twitch_data.ts";
 
 export function useChat(ws: WebSocket, channel: string) {
-  const [messages, setMessages] = useState<PrivMsgEvt[]>([]);
+  const [messages, setMessages] = useState<IrcMessage[]>([]);
   const [joined, setJoined] = useState<boolean>(false);
-  const [throttling, setThrottling] = useState<boolean>(false);
 
   const userInfo = useUserInfo();
 
-  const queue = useRef<PrivMsgEvt[]>([]);
+  const queue = useRef<IrcMessage[]>([]);
+  const throttling = useRef<boolean>(false);
 
   const throttleMsgs = useCallback(async () => {
-    setThrottling(true);
+    throttling.current = true;
     const throttle = async () => {
       while (queue.current.length) {
         const snippet = queue.current.splice(0, 10);
@@ -29,19 +31,19 @@ export function useChat(ws: WebSocket, channel: string) {
       }
     };
     await throttle();
-    setThrottling(false);
-  }, [setMessages, setThrottling]);
-  console.log(messages.length);
+    throttling.current = false;
+  }, [setMessages]);
+
   const send = useCallback(
     (msg: string, broadcast: boolean) => {
       if (!userInfo || !ws) return;
-
-      const privMsg: PrivMsgEvt = {
-        username: userInfo.display_name ?? "",
-        message: msg,
+      const ircMsg = createIRCMessage(
+        msg,
         channel,
-      };
-      setMessages((prev) => [...prev, privMsg]);
+        userInfo.display_name ?? "",
+      );
+
+      setMessages((prev) => [...prev, ircMsg]);
       if (broadcast) {
         ws.send(`PRIVMSG ${channel} :${msg}`);
       }
@@ -52,9 +54,9 @@ export function useChat(ws: WebSocket, channel: string) {
     const ref = ({ data }: MessageEvent<string>) => {
       handleMessage(data, {
         PRIVMSG: (msg) => {
-          if (msg.channel === channel) {
+          if (msg && msg.channel === channel) {
             queue.current.push(msg);
-            if (!throttling) throttleMsgs();
+            if (!throttling.current) throttleMsgs();
           }
         },
         JOIN: (chanName) => {
@@ -76,7 +78,7 @@ export function useChat(ws: WebSocket, channel: string) {
   }, [joined, ws, channel, setJoined]);
 
   const isMentioned = useCallback(
-    (msg: PrivMsgEvt) => {
+    (msg: IrcMessage) => {
       if (!userInfo) return false;
       return msg.message
         .toLowerCase()
