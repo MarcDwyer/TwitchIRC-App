@@ -6,25 +6,32 @@ import { delay } from "../util/delay.ts";
 export function useChat(ws: WebSocket, channel: string) {
   const [messages, setMessages] = useState<PrivMsgEvt[]>([]);
   const [joined, setJoined] = useState<boolean>(false);
-  const [updating, setUpdating] = useState<boolean>(false);
+  const [throttling, setThrottling] = useState<boolean>(false);
 
   const userInfo = useUserInfo();
 
   const queue = useRef<PrivMsgEvt[]>([]);
 
   const throttleMsgs = useCallback(async () => {
-    setUpdating(true);
+    setThrottling(true);
     const throttle = async () => {
       while (queue.current.length) {
         const snippet = queue.current.splice(0, 10);
-        setMessages((prev) => [...prev, ...snippet]);
+        setMessages((prev) => {
+          const limit = 200;
+          const nextLen = prev.length + snippet.length;
+          if (nextLen >= limit) {
+            prev.splice(0, nextLen - limit);
+          }
+          return [...prev, ...snippet];
+        });
         await delay(750);
       }
     };
     await throttle();
-    setUpdating(false);
-  }, [setMessages, setUpdating]);
-
+    setThrottling(false);
+  }, [setMessages, setThrottling]);
+  console.log(messages.length);
   const send = useCallback(
     (msg: string, broadcast: boolean) => {
       if (!userInfo || !ws) return;
@@ -47,7 +54,7 @@ export function useChat(ws: WebSocket, channel: string) {
         PRIVMSG: (msg) => {
           if (msg.channel === channel) {
             queue.current.push(msg);
-            if (!updating) throttleMsgs();
+            if (!throttling) throttleMsgs();
           }
         },
         JOIN: (chanName) => {
@@ -60,7 +67,7 @@ export function useChat(ws: WebSocket, channel: string) {
     return function () {
       ws.removeEventListener("message", ref);
     };
-  }, [ws, channel, throttleMsgs, updating]);
+  }, [ws, channel, throttleMsgs, throttling]);
 
   useEffect(() => {
     if (!joined) {
@@ -77,7 +84,6 @@ export function useChat(ws: WebSocket, channel: string) {
     },
     [userInfo],
   );
-  console.log({ updating });
   return {
     channel,
     messages,
