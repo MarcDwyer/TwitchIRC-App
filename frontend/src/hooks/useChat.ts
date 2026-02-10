@@ -62,7 +62,7 @@ export function useChat(
         ws.send(`PRIVMSG ${channel} :${msg}`);
       }
     },
-    [ws, userInfo, channel, setMessages],
+    [ws, userInfo, channel],
   );
   useEffect(() => {
     const ref = ({ data }: MessageEvent<string>) => {
@@ -86,13 +86,13 @@ export function useChat(
     return function () {
       ws.removeEventListener("message", ref);
     };
-  }, [ws, channel, batchMsgs, setJoined]);
+  }, [ws, channel, batchMsgs]);
 
   useEffect(() => {
     if (!joined) {
       ws.send(`Join ${channel}`);
     }
-  }, [joined, ws, channel, setJoined]);
+  }, [joined, ws, channel]);
 
   const isMentioned = useCallback(
     (msg: IrcMessage) => {

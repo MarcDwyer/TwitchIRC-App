@@ -3,6 +3,7 @@ import { useChat } from "../../hooks/useChat.ts";
 import { BroadcastHandler } from "../../pages/Dashboard/Dashboard.tsx";
 import { useAutocomplete } from "../../hooks/useAutocomplete.ts";
 import { checkForAutoComplete } from "../../util/autcomplete.ts";
+import { usePause } from "../../hooks/usePause.ts";
 
 type Props = {
   ws: WebSocket;
@@ -16,18 +17,38 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { updateSeen, filteredUsers, setAutoComplete, disableAutoComplete } =
-    useAutocomplete();
+  const {
+    updateSeen,
+    filteredUsers,
+    setAutoComplete,
+    disableAutoComplete,
+    autocomplete,
+  } = useAutocomplete();
 
   useEffect(() => {
     setSelectedIndex(0);
-  }, [filteredUsers, setSelectedIndex]);
-  const onSelect = (_user: string) => {};
+  }, [filteredUsers]);
 
-  const chatRef = useRef<HTMLDivElement>(null);
+  const onSelect = (user: string) => {
+    const str = input;
+    const { left, right } = autocomplete;
+    console.log({ left: str[left], right: str[right] });
+
+    const start = str.slice(0, autocomplete.left);
+    const end = str.slice(autocomplete.right + 1, str.length);
+
+    const result = start + user + end;
+    console.log({ start, end, result });
+    setInput(result);
+    disableAutoComplete();
+    const pos = left + user.length;
+    requestAnimationFrame(() => {
+      inputRef.current?.setSelectionRange(pos, pos);
+    });
+  };
 
   const { messages, send, isMentioned } = useChat(ws, channel, updateSeen);
-  const [paused, setPaused] = useState(false);
+  const { chatRef, paused, handleScroll, resumeChat } = usePause(messages);
 
   useEffect(() => {
     const funcRef = (msg: string) => {
@@ -39,25 +60,6 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
       if (index !== -1) broadcastHandlers.current.splice(index, 1);
     };
   }, [send]);
-
-  useEffect(() => {
-    const el = chatRef.current;
-    if (!el || paused) return;
-    el.scrollTop = el.scrollHeight;
-  }, [messages, paused]);
-
-  function handleScroll() {
-    const el = chatRef.current;
-    if (!el) return;
-    const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
-    setPaused(distanceFromBottom > 30);
-  }
-
-  function resumeChat() {
-    setPaused(false);
-    const el = chatRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }
   return (
     <div className="flex flex-col flex-1 min-h-0 relative">
       <div
@@ -133,7 +135,6 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
                 );
                 setAutoComplete(check);
               } else {
-                console.log("else");
                 disableAutoComplete();
               }
             }}

@@ -22,7 +22,7 @@ export function checkForAutoComplete(text: string, start: number) {
   return {
     isAutoComplete,
     word: isAutoComplete ? word.substring(1, word.length) : word,
-    left: left + 1,
+    left: left + 2,
     right: right - 1,
   };
 }

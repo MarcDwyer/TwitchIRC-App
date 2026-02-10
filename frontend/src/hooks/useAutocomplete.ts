@@ -12,15 +12,18 @@ export function useAutocomplete() {
   });
   const disableAutoComplete = () =>
     setAutoComplete({ ...autocomplete, isAutoComplete: false });
+
   const updateSeen = useCallback(
     (newMsgs: IrcMessage[]) => {
       const updated: Set<string> = new Set(seen);
       for (const msg of newMsgs) {
-        updated.add(msg.username);
+        if (!updated.has(msg.username)) {
+          updated.add(msg.username);
+        }
       }
       setSeen(updated);
     },
-    [seen, setSeen],
+    [seen],
   );
   const filteredUsers: string[] = useMemo(() => {
     if (!autocomplete.isAutoComplete) return [];
@@ -35,5 +38,6 @@ export function useAutocomplete() {
     filteredUsers,
     setAutoComplete,
     disableAutoComplete,
+    autocomplete,
   };
 }
