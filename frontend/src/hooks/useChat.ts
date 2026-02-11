@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { handleChannelMsg, HandleMsgCallbacks } from "../util/handleMessage.ts";
+import { handleMessage, HandleMsgCallbacks } from "../util/handleMessage.ts";
 import { useUserInfo } from "./useUserInfo.ts";
 import { delay } from "../util/delay.ts";
 import { createIRCMessage } from "../util/createIRCMessage.ts";
@@ -46,7 +46,7 @@ export function useChat(
     };
     await batch();
     batching.current = false;
-  }, [setMessages, newMsgsCB]);
+  }, [newMsgsCB]);
 
   const send = useCallback(
     (msg: string, broadcast: boolean) => {
@@ -72,14 +72,17 @@ export function useChat(
           if (!batching.current) batchMsgs();
         },
         USERSTATE: (ircMsg) => {
-          console.log({ userState: ircMsg });
           userState.current = ircMsg;
         },
         JOIN: () => {
           setJoined(true);
         },
       };
-      handleChannelMsg({ data, channel, cbs });
+      handleMessage({
+        data,
+        cbs,
+        shouldInvoke: (ircMsg) => ircMsg.channel === channel,
+      });
     };
     ws.addEventListener("message", ref);
 

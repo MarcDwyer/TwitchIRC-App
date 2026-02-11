@@ -41,7 +41,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
     console.log({ start, end, result });
     setInput(result);
     disableAutoComplete();
-    const pos = left + user.length;
+    const pos = left + user.length + 1;
     requestAnimationFrame(() => {
       inputRef.current?.setSelectionRange(pos, pos);
     });
@@ -60,6 +60,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
       if (index !== -1) broadcastHandlers.current.splice(index, 1);
     };
   }, [send]);
+
   return (
     <div className="flex flex-col flex-1 min-h-0 relative">
       <div

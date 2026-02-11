@@ -31,9 +31,12 @@ export function useTwitchIRC() {
       return;
     }
     ws.addEventListener("message", ({ data }: MessageEvent<string>) =>
-      handleMessage(data, {
-        "001": () => setStatus("authenticated"),
-        PING: () => ws.send("PONG :tmi.twitch.tv"),
+      handleMessage({
+        data,
+        cbs: {
+          "001": () => setStatus("authenticated"),
+          PING: () => ws.send("PONG :tmi.twitch.tv"),
+        },
       }),
     );
     ws.addEventListener("error", (err) => {

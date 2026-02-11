@@ -2,7 +2,6 @@ import { useTwitchCtxActions } from "../context/twitchctx.tsx";
 
 export function LogoutBtn() {
   const { logout } = useTwitchCtxActions();
-
   return (
     <button
       type="button"

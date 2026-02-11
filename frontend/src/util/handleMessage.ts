@@ -11,13 +11,18 @@ export type PrivMsgEvt = {
 export type HandleMsgCallbacks = {
   [K in keyof typeof Commands]?: (msg: IrcMessage) => void;
 };
-
-export function handleMessage(
-  data: string,
-  cbs: HandleMsgCallbacks = {},
-): void {
+export type HandleMessageParams = {
+  data: string;
+  cbs: HandleMsgCallbacks;
+  shouldInvoke?: (ircMsg: IrcMessage) => boolean;
+};
+export function handleMessage({
+  data,
+  cbs,
+  shouldInvoke,
+}: HandleMessageParams): void {
   const ircMsg = msgParcer(data);
-  if (!ircMsg) return;
+  if (!ircMsg || (ircMsg && shouldInvoke && !shouldInvoke(ircMsg))) return;
   cbs[ircMsg.command]?.(ircMsg);
 }
 

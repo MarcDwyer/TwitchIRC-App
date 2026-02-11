@@ -7,7 +7,7 @@ export function checkForAutoComplete(text: string, start: number) {
   while (text[left] || text[right]) {
     const leftCheck = text[left] && !breakingChars.test(text[left]);
     const rightCheck = text[right] && !breakingChars.test(text[right]);
-    console.log({ leftCheck, rightCheck });
+
     if (leftCheck) {
       word = text[left] + word;
       left--;

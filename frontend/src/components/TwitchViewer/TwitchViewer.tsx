@@ -12,8 +12,8 @@ type Props = {
 
 export function TwitchViewer({ stream, part, ws, broadcastHandlers }: Props) {
   const channel = useMemo(() => `#${stream.user_login}`, [stream]);
-  const embedUrl = `https://player.twitch.tv/?channel=${stream.user_login}&parent=${location.hostname}`;
-
+  const embedUrl =
+    `https://player.twitch.tv/?channel=${stream.user_login}&parent=${location.hostname}`;
   return (
     <div className="flex flex-col h-full w-full bg-zinc-800 rounded-lg border border-zinc-700 overflow-hidden">
       <div className="relative w-full aspect-video shrink-0 overflow-hidden">
