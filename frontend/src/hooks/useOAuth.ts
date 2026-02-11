@@ -5,6 +5,8 @@ import { OAUTH_KEY } from "../util/storageKeys.ts";
 export const useOAuth = () => {
   const { oauth, _setOAuth } = useTwitchCtx();
 
+  const validating = oauth.token && !oauth.validated;
+
   const checkURLForToken = () => {
     const hash = location.hash.substring(1);
     const params = new URLSearchParams(hash);
@@ -37,5 +39,6 @@ export const useOAuth = () => {
     oauth,
     validateToken,
     checkURLForToken,
+    validating,
   };
 };

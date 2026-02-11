@@ -32,10 +32,9 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
   const onSelect = (user: string) => {
     const str = input;
     const { left, right } = autocomplete;
-    console.log({ left: str[left], right: str[right] });
 
-    const start = str.slice(0, autocomplete.left);
-    const end = str.slice(autocomplete.right + 1, str.length);
+    const start = str.slice(0, left);
+    const end = str.slice(right + 1, str.length);
 
     const result = start + user + end;
     console.log({ start, end, result });
@@ -73,7 +72,11 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
           return (
             <div
               key={i}
-              className={`text-sm ${mentioned ? "bg-purple-500/20 border-l-2 border-purple-500 pl-2 -ml-2" : ""}`}
+              className={`text-sm ${
+                mentioned
+                  ? "bg-purple-500/20 border-l-2 border-purple-500 pl-2 -ml-2"
+                  : ""
+              }`}
             >
               <span
                 className="font-semibold"
@@ -81,7 +84,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
               >
                 {msg.username}
               </span>
-              <span className="text-zinc-500">: </span>
+              <span className="text-zinc-500">:</span>
               <span className="text-zinc-300">{msg.message}</span>
             </div>
           );
@@ -147,7 +150,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
               } else if (e.key === "ArrowDown") {
                 e.preventDefault();
                 setSelectedIndex((i) =>
-                  Math.min(filteredUsers.length - 1, i + 1),
+                  Math.min(filteredUsers.length - 1, i + 1)
                 );
               } else if (e.key === "Tab" || e.key === "Enter") {
                 e.preventDefault();

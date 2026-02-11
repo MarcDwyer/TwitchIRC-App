@@ -1,6 +1,7 @@
 import { Stream } from "../../lib/twitch_api/twitch_api_types.ts";
 import { BroadcastHandler } from "../../pages/Dashboard/Dashboard.tsx";
 import { Chat } from "./Chat.tsx";
+import { StreamInfo } from "./StreamInfo.tsx";
 import { useMemo } from "react";
 
 type Props = {
@@ -54,12 +55,7 @@ export function TwitchViewer({ stream, part, ws, broadcastHandlers }: Props) {
         </div>
       </div>
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
-        <div className="flex items-center justify-between px-3 py-2 border-t border-zinc-700">
-          <span className="text-zinc-100 text-sm font-medium">
-            {stream.user_name}
-          </span>
-          <span className="text-zinc-400 text-xs">{stream.game_name}</span>
-        </div>
+        <StreamInfo stream={stream} />
         {ws && (
           <Chat
             ws={ws}

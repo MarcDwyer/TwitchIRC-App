@@ -18,6 +18,7 @@ export function Following({ onClick }: Props) {
           Following Streams {following && `(${following.length})`}
         </h2>
         <button
+          type="button"
           onClick={() => setIsVisible(!isVisible)}
           className="px-3 py-1.5 text-sm bg-zinc-700 hover:bg-zinc-600 text-zinc-100 rounded transition-colors"
         >

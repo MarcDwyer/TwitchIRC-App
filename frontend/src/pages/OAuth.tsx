@@ -15,8 +15,7 @@ function generateState(): string {
 
 export function OAuthPage() {
   const { clientID } = useTwitchCtx();
-  const { oauth, checkURLForToken, validateToken } = useOAuth();
-
+  const { oauth, checkURLForToken, validateToken, validating } = useOAuth();
   useEffect(() => {
     if (!oauth.token) {
       checkURLForToken();
@@ -41,9 +40,35 @@ export function OAuthPage() {
       state: state,
     });
 
-    const authUrl = `https://id.twitch.tv/oauth2/authorize?${params.toString()}`;
+    const authUrl =
+      `https://id.twitch.tv/oauth2/authorize?${params.toString()}`;
     location.href = authUrl;
   };
+
+  if (validating) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-zinc-900">
+        <div className="bg-zinc-800 rounded-xl p-10 max-w-md w-full shadow-lg text-center">
+          <svg
+            className="w-12 h-12 mx-auto mb-4 animate-spin"
+            viewBox="0 0 256 268"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M17.458 0L0 46.556v186.201h63.983v34.934h34.931l34.898-34.934h52.36L256 162.954V0H17.458zm23.259 23.263H232.73v128.029l-40.739 40.741h-63.992l-34.898 34.903v-34.903H40.717V23.263zm63.983 94.636h23.275v-69.81H104.7v69.81zm63.982 0h23.27v-69.81h-23.27v69.81z"
+              fill="#9146FF"
+            />
+          </svg>
+          <h1 className="text-2xl font-bold text-zinc-100">
+            Validating Token...
+          </h1>
+          <p className="text-zinc-400 mt-4">
+            Checking your OAuth token with Twitch
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-zinc-900">
