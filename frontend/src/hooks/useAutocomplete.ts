@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { IrcMessage } from "../types/twitch_data.ts";
 import { CheckAutoCompleteReturn } from "../util/autcomplete.ts";
+import { Stream } from "../lib/twitch_api/twitch_api_types.ts";
 
 const isOlderThan10Min = (timestamp: number) =>
   Date.now() - timestamp > 10 * 60 * 1000;
 
-export function useAutocomplete() {
-  const [seen, setSeen] = useState<Map<string, number>>(new Map());
+export function useAutocomplete(stream: Stream) {
+  const [chatters, setChatters] = useState<Map<string, number>>(new Map());
   const [autocomplete, setAutoComplete] = useState<CheckAutoCompleteReturn>({
     isAutoComplete: false,
     word: "",
@@ -16,30 +17,26 @@ export function useAutocomplete() {
   const disableAutoComplete = () =>
     setAutoComplete({ ...autocomplete, isAutoComplete: false });
 
-  const updateSeen = useCallback(
+  const updateChatters = useCallback(
     (newMsgs: IrcMessage[]) => {
-      const updated = new Map(seen);
-      for (const msg of newMsgs) {
-        updated.set(msg.username, Date.now());
-      }
-      setSeen(updated);
+      setChatters((prevChatters) => {
+        const updated = new Map(prevChatters);
+        for (const msg of newMsgs) {
+          updated.set(msg.username, Date.now());
+        }
+        return updated;
+      });
     },
-    [seen],
+    [],
   );
-  const filteredUsers: string[] = useMemo(() => {
-    if (!autocomplete.isAutoComplete) return [];
-    return Array.from(seen.keys()).filter((username) =>
-      username.startsWith(autocomplete.word),
-    );
-  }, [autocomplete, seen]);
 
-  const cleanSeen = useCallback(() => {
-    setSeen((prevSeen) => {
-      const updated = new Map(prevSeen);
+  const removeIdleChatters = useCallback(() => {
+    setChatters((prev) => {
+      const updated = new Map(prev);
       const removed = [];
       for (const [username, lastMsg] of updated.entries()) {
         const isOld = isOlderThan10Min(lastMsg);
-        if (isOld) {
+        if (isOld && username !== stream.user_name) {
           removed.push(username);
           updated.delete(username);
         }
@@ -50,18 +47,21 @@ export function useAutocomplete() {
   }, []);
 
   useEffect(() => {
-    const cleanup = setInterval(cleanSeen, 1000 * 60 * 10);
+    const cleanup = setInterval(removeIdleChatters, 1000 * 60 * 10);
     return function () {
-      console.log("unmounting seen");
       clearInterval(cleanup);
     };
-  }, [cleanSeen]);
+  }, [removeIdleChatters]);
+
+  useEffect(() => {
+    setChatters((prev) => prev.set(stream.user_name, -1));
+  }, [stream]);
 
   return {
-    updateSeen,
-    filteredUsers,
+    updateChatters,
     setAutoComplete,
     disableAutoComplete,
     autocomplete,
+    chatters,
   };
 }

@@ -4,30 +4,28 @@ import { BroadcastHandler } from "../../pages/Dashboard/Dashboard.tsx";
 import { useAutocomplete } from "../../hooks/useAutocomplete.ts";
 import { checkForAutoComplete } from "../../util/autcomplete.ts";
 import { usePause } from "../../hooks/usePause.ts";
+import { Stream } from "../../lib/twitch_api/twitch_api_types.ts";
+import { Autocomplete } from "./Autocomplete.tsx";
 
 type Props = {
   ws: WebSocket;
   channel: string;
   broadcastHandlers: React.RefObject<BroadcastHandler[]>;
+  stream: Stream;
 };
 
-export function Chat({ ws, channel, broadcastHandlers }: Props) {
+export function Chat({ ws, channel, broadcastHandlers, stream }: Props) {
   const [input, setInput] = useState("");
-  const [selectedIndex, setSelectedIndex] = useState(0);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   const {
-    updateSeen,
-    filteredUsers,
+    updateChatters,
+    chatters,
     setAutoComplete,
     disableAutoComplete,
     autocomplete,
-  } = useAutocomplete();
-
-  useEffect(() => {
-    setSelectedIndex(0);
-  }, [filteredUsers]);
+  } = useAutocomplete(stream);
 
   const onSelect = (user: string) => {
     const str = input;
@@ -37,7 +35,6 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
     const end = str.slice(right + 1, str.length);
 
     const result = start + user + end;
-    console.log({ start, end, result });
     setInput(result);
     disableAutoComplete();
     const pos = left + user.length + 1;
@@ -46,7 +43,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
     });
   };
 
-  const { messages, send, isMentioned } = useChat(ws, channel, updateSeen);
+  const { messages, send, isMentioned } = useChat(ws, channel, updateChatters);
   const { chatRef, paused, handleScroll, resumeChat } = usePause(messages);
 
   useEffect(() => {
@@ -100,23 +97,13 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
         </button>
       )}
       <div className="relative px-3 py-2 border-t border-zinc-700">
-        {filteredUsers.length >= 1 && (
-          <div className="absolute bottom-full left-0 right-0 mx-3 mb-1 bg-zinc-800 border border-zinc-600 rounded shadow-lg max-h-40 overflow-y-auto">
-            {filteredUsers.map((user, i) => (
-              <button
-                key={user}
-                type="button"
-                onClick={() => onSelect(user)}
-                className={`w-full text-left px-3 py-1.5 text-sm cursor-pointer ${
-                  i === selectedIndex
-                    ? "bg-purple-600 text-white"
-                    : "text-zinc-300 hover:bg-zinc-700"
-                }`}
-              >
-                {user}
-              </button>
-            ))}
-          </div>
+        {autocomplete.isAutoComplete && (
+          <Autocomplete
+            chatters={chatters}
+            onSelect={onSelect}
+            inputRef={inputRef}
+            word={autocomplete.word}
+          />
         )}
         <form
           onSubmit={(e) => {
@@ -140,23 +127,6 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
                 setAutoComplete(check);
               } else {
                 disableAutoComplete();
-              }
-            }}
-            onKeyDown={(e) => {
-              if (filteredUsers.length === 0) return;
-              if (e.key === "ArrowUp") {
-                e.preventDefault();
-                setSelectedIndex((i) => Math.max(0, i - 1));
-              } else if (e.key === "ArrowDown") {
-                e.preventDefault();
-                setSelectedIndex((i) =>
-                  Math.min(filteredUsers.length - 1, i + 1)
-                );
-              } else if (e.key === "Tab" || e.key === "Enter") {
-                e.preventDefault();
-                onSelect(filteredUsers[selectedIndex]);
-              } else if (e.key === "Escape") {
-                setSelectedIndex(0);
               }
             }}
             placeholder="Send a message"

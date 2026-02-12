@@ -5,7 +5,10 @@
       "mcp__acp__Edit",
       "mcp__acp__Bash",
       "Bash(deno install:*)",
-      "WebFetch(domain:zed.dev)"
+      "WebFetch(domain:zed.dev)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "WebFetch(domain:dev.twitch.tv)"
     ]
   }
 }

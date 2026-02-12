@@ -17,7 +17,7 @@ export function TwitchViewer({ stream, part, ws, broadcastHandlers }: Props) {
     `https://player.twitch.tv/?channel=${stream.user_login}&parent=${location.hostname}`;
   return (
     <div className="flex flex-col h-full w-full bg-zinc-800 rounded-lg border border-zinc-700 overflow-hidden">
-      <div className="relative w-full aspect-video shrink-0 overflow-hidden">
+      <div className="relative w-full aspect-video shrink-0 overflow-hidden max-h-180">
         <iframe
           src={embedUrl}
           className="w-full h-full"
@@ -61,6 +61,7 @@ export function TwitchViewer({ stream, part, ws, broadcastHandlers }: Props) {
             ws={ws}
             channel={channel}
             broadcastHandlers={broadcastHandlers}
+            stream={stream}
           />
         )}
       </div>
