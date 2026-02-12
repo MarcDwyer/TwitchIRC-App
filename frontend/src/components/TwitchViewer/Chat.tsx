@@ -103,6 +103,7 @@ export function Chat({ ws, channel, broadcastHandlers, stream }: Props) {
             onSelect={onSelect}
             inputRef={inputRef}
             word={autocomplete.word}
+            disableAutocomplete={disableAutoComplete}
           />
         )}
         <form

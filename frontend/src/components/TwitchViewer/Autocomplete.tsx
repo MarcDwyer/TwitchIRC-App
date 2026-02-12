@@ -5,6 +5,7 @@ type Props = {
   onSelect: (chatter: string) => void;
   word: string;
   inputRef: React.RefObject<HTMLInputElement | null>;
+  disableAutocomplete: () => void;
 };
 
 enum SubmitKeys {
@@ -17,7 +18,7 @@ function matchUsers(word: string, usernames: string[]) {
 }
 
 export function Autocomplete(
-  { chatters, onSelect, inputRef, word }: Props,
+  { chatters, onSelect, inputRef, word, disableAutocomplete }: Props,
 ) {
   const [index, setIndex] = useState(0);
   const [matched, setMatched] = useState<string[]>(
@@ -43,6 +44,10 @@ export function Autocomplete(
       if (key in SubmitKeys && matched[index]) {
         e.preventDefault();
         onSelect(matched[index]);
+        return;
+      }
+      if (key === "Escape") {
+        disableAutocomplete();
         return;
       }
       setIndex((prevIndex) => {
