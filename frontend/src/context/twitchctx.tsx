@@ -51,12 +51,6 @@ export const TwitchProvider = ({
   const [oauth, _setOAuth] = useState<OAuth>(InitialOAuth);
   const [twitchAPI, _setTwitchAPI] = useState<TwitchAPI | null>(null);
 
-  useEffect(() => {
-    const lsClientID = localStorage.getItem(CLIENT_ID_KEY);
-    const lsToken = localStorage.getItem(OAUTH_KEY);
-    if (lsClientID && !clientID) _setClientID(lsClientID);
-    if (lsToken && !oauth.token) _setOAuth({ ...oauth, token: lsToken });
-  }, [_setClientID, _setOAuth, clientID, oauth]);
   return (
     <TwitchContext.Provider
       value={{
@@ -76,19 +70,4 @@ export const TwitchProvider = ({
 export const useTwitchCtx = () => {
   const twitch = useContext(TwitchContext);
   return twitch;
-};
-
-export const useTwitchCtxActions = () => {
-  const { _setClientID, _setOAuth } = useContext(TwitchContext);
-
-  const logout = () => {
-    localStorage.removeItem(OAUTH_KEY);
-    localStorage.removeItem(CLIENT_ID_KEY);
-    _setClientID(null);
-    _setOAuth(InitialOAuth);
-  };
-
-  return {
-    logout,
-  };
 };

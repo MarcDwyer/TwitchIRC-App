@@ -1,33 +1,28 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Stream } from "../lib/twitch_api/twitch_api_types.ts";
 import { useTwitchAPI } from "./useTwitchAPI.ts";
 
-export function useFollowing() {
+export function useFollowing(): [Stream[] | null, boolean] {
   const [following, setFollowing] = useState<Stream[] | null>(null);
-  const twitchAPI = useTwitchAPI();
-
-  const getFollowing = useCallback(() => {
-    if (!twitchAPI) return;
-    twitchAPI
-      ?.getLiveFollowedChannels()
-      .then((resp) => setFollowing(resp.data));
-  }, [twitchAPI, setFollowing]);
+  const { getFollowing, getFollowingLoading } = useTwitchAPI();
 
   useEffect(() => {
     if (!following) {
-      getFollowing();
+      getFollowing().then(setFollowing);
     }
   }, [following, getFollowing]);
 
   useEffect(() => {
     let refresh: number;
     if (following) {
-      refresh = setInterval(getFollowing, 1000 * 10 * 3);
+      refresh = setInterval(() => {
+        getFollowing().then(setFollowing);
+      }, 60000 * 3);
     }
     return function () {
       if (refresh) clearInterval(refresh);
     };
   }, [getFollowing, following]);
 
-  return following;
+  return [following, getFollowingLoading];
 }

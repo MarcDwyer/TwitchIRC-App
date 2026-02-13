@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useTwitchCtx } from "../context/twitchctx.tsx";
 import { CLIENT_ID_KEY } from "../util/storageKeys.ts";
 
@@ -9,16 +9,27 @@ export const useClientID = () => {
     (newClientID: string | null) => {
       if (newClientID) {
         localStorage.setItem(CLIENT_ID_KEY, newClientID);
-      } else {
-        localStorage.removeItem(CLIENT_ID_KEY);
       }
       _setClientID(newClientID);
     },
-    [_setClientID],
+    [],
   );
+
+  useEffect(() => {
+    const lsClientID = localStorage.getItem(CLIENT_ID_KEY);
+    if (lsClientID) {
+      _setClientID(lsClientID);
+    }
+  }, []);
+
+  const clear = () => {
+    localStorage.removeItem(CLIENT_ID_KEY);
+    _setClientID(null);
+  };
 
   return {
     clientID,
     setClientID,
+    clear,
   };
 };

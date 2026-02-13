@@ -2,3 +2,6 @@
 ☐ Fix grid/flexbox issues. Just make it simpler. @started(26-02-08 17:16)
 ✔ Fix autocomplete as its more complex then it seems @done(26-02-10 05:24)
 ✔ Add more involved IRCMessage type and functions @started(26-02-09 01:24) @done(26-02-09 01:37) @lasted(13m28s)
+
+
+Add ability to join any channel

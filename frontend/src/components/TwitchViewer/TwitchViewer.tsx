@@ -10,13 +10,12 @@ type Props = {
   part: (stream: Stream, channel: string) => void;
   broadcastHandlers: React.RefObject<BroadcastHandler[]>;
 };
-
 export function TwitchViewer({ stream, part, ws, broadcastHandlers }: Props) {
   const channel = useMemo(() => `#${stream.user_login}`, [stream]);
   const embedUrl =
     `https://player.twitch.tv/?channel=${stream.user_login}&parent=${location.hostname}`;
   return (
-    <div className="flex flex-col h-full w-full bg-zinc-800 rounded-lg border border-zinc-700 overflow-hidden">
+    <div className="flex flex-col h-full basis-[calc(33.333%-0.25rem)] bg-zinc-800 rounded-lg border border-zinc-700">
       <div className="relative w-full aspect-video shrink-0 overflow-hidden max-h-180">
         <iframe
           src={embedUrl}
@@ -54,7 +53,7 @@ export function TwitchViewer({ stream, part, ws, broadcastHandlers }: Props) {
           </svg>
         </div>
       </div>
-      <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
+      <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
         <StreamInfo stream={stream} />
         {ws && (
           <Chat

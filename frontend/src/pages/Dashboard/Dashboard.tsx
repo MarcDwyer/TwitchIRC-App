@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import "./Dashboard.css";
 import { Navbar } from "../../components/Navbar.tsx";
 import { StreamSidebar } from "../../components/StreamSidebar.tsx";
-import { useFollowing } from "../../hooks/useFollowing.ts";
 import { Stream } from "../../lib/twitch_api/twitch_api_types.ts";
 import { TwitchViewer } from "../../components/TwitchViewer/TwitchViewer.tsx";
 import { useTwitchIRC } from "../../hooks/useTwitchIRC.ts";
@@ -12,9 +10,8 @@ import { useUserInfo } from "../../hooks/useUserInfo.ts";
 export type BroadcastHandler = (msg: string) => void;
 
 export function Dashboard() {
-  const [viewing, setViewing] = useState<Set<Stream>>(new Set());
+  const [viewing, setViewing] = useState<Map<string, Stream>>(new Map());
   const [broadcastOpen, setBroadcastOpen] = useState(false);
-  const following = useFollowing();
   const { ws } = useTwitchIRC();
   const userInfo = useUserInfo();
 
@@ -23,6 +20,13 @@ export function Dashboard() {
   const broadcast = (msg: string) => {
     if (!userInfo || !ws) return;
     broadcastHandlers.current.forEach((push) => push(msg));
+  };
+
+  const part = (stream: Stream, channel: string) => {
+    const updated = new Map(viewing);
+    updated.delete(stream.user_name);
+    setViewing(updated);
+    ws?.send(`PART ${channel}`);
   };
 
   useEffect(() => {
@@ -53,55 +57,56 @@ export function Dashboard() {
       </Navbar>
       <div className="flex flex-nowrap flex-1 min-h-0 w-full">
         <StreamSidebar
-          streams={following}
           onClick={(stream) => {
-            if (!viewing.has(stream)) {
-              setViewing(new Set(viewing).add(stream));
+            if (!viewing.has(stream.user_name)) {
+              setViewing(new Map(viewing).set(stream.user_name, stream));
             }
           }}
           onBroadcastAll={() => setBroadcastOpen(true)}
-          onJoinAll={() => {
-            if (!following) return;
-            const viewAll = following.reduce<Set<Stream>>((view, stream) => {
-              if (!view.has(stream)) {
-                view.add(stream);
-              }
-              return view;
-            }, new Set(viewing));
-            setViewing(viewAll);
-          }}
+          onJoinAll={() => {}}
         />
         <main className="w-full h-full bg-zinc-800 overflow-y-scroll p-2">
-          {viewing.size === 0 ? (
-            <div className="flex items-center justify-center h-full">
-              <p className="text-zinc-500">
-                Select a channel from the sidebar to join
-              </p>
-            </div>
-          ) : (
-            <div
-              className="viewing-grid h-full auto-rows-fr gap-4"
-              style={
-                { "--count": Math.min(viewing.size, 3) } as React.CSSProperties
-              }
-            >
-              {Array.from(viewing).map((stream) => (
-                <div key={stream.id} className="min-w-0">
+          {viewing.size === 0
+            ? (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-zinc-500">
+                  Select a channel from the sidebar to join
+                </p>
+              </div>
+            )
+            : (
+              <div
+                className={`grid gap-1 h-full ${
+                  (() => {
+                    const count = viewing.size;
+                    const cols = Math.min(count, 3);
+                    const rows = Math.ceil(count / 3);
+                    // Tailwind needs full class strings — no dynamic interpolation
+                    const colClasses = [
+                      "grid-cols-1",
+                      "grid-cols-2",
+                      "grid-cols-3",
+                    ] as const;
+                    const rowClasses = ["grid-rows-1", "grid-rows-2"] as const;
+                    const colClass = colClasses[cols - 1];
+                    if (rows <= 2) {
+                      return `${colClass} ${rowClasses[rows - 1]}`;
+                    }
+                    return `${colClass} auto-rows-[50%] overflow-y-auto`;
+                  })()
+                }`}
+              >
+                {Array.from(viewing.values()).map((stream) => (
                   <TwitchViewer
+                    key={stream.id}
                     stream={stream}
                     ws={ws}
                     broadcastHandlers={broadcastHandlers}
-                    part={(stream, channelName) => {
-                      const updated = new Set(viewing);
-                      updated.delete(stream);
-                      setViewing(updated);
-                      ws?.send(`PART ${channelName}`);
-                    }}
+                    part={part}
                   />
-                </div>
-              ))}
-            </div>
-          )}
+                ))}
+              </div>
+            )}
         </main>
       </div>
       <BroadcastModal

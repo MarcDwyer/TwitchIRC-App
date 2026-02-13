@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useTwitchCtx } from "../context/twitchctx.tsx";
 import { useOAuth } from "../hooks/useOAuth.ts";
+import { useClientID } from "../hooks/useClientID.ts";
 
 const REDIRECT_URI = "http://localhost:5173/oauth/callback";
 const SCOPES = ["chat:read", "chat:edit", "user:read:follows"];
@@ -15,18 +16,13 @@ function generateState(): string {
 
 export function OAuthPage() {
   const { clientID } = useTwitchCtx();
-  const { oauth, checkURLForToken, validateToken, validating } = useOAuth();
+  const { oauth, checkURLForToken } = useOAuth();
+  const { clear } = useClientID();
   useEffect(() => {
     if (!oauth.token) {
       checkURLForToken();
     }
   }, [oauth.token, checkURLForToken]);
-
-  useEffect(() => {
-    if (oauth.token && !oauth.validated) {
-      validateToken();
-    }
-  }, [oauth, validateToken]);
 
   const handleGenerateToken = () => {
     const state = generateState();
@@ -45,7 +41,7 @@ export function OAuthPage() {
     location.href = authUrl;
   };
 
-  if (validating) {
+  if (oauth.token && !oauth.validated) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-zinc-900">
         <div className="bg-zinc-800 rounded-xl p-10 max-w-md w-full shadow-lg text-center">
@@ -105,6 +101,14 @@ export function OAuthPage() {
           <span className="text-zinc-500 text-sm">or</span>
           <div className="flex-1 h-px bg-zinc-700" />
         </div>
+
+        <button
+          type="button"
+          onClick={clear}
+          className="w-full bg-zinc-700 text-zinc-300 py-3 px-6 rounded-md text-base font-semibold cursor-pointer transition-colors duration-200 hover:bg-zinc-600"
+        >
+          Reset
+        </button>
 
         <div className="text-center mt-6 pt-6 border-t border-zinc-700">
           <p className="text-zinc-400 text-sm mb-2">Need help with OAuth?</p>

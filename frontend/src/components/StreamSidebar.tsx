@@ -1,18 +1,54 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Stream } from "../lib/twitch_api/twitch_api_types.ts";
+import { useFollowing } from "../hooks/useFollowing.ts";
+import { useTwitchAPI } from "../hooks/useTwitchAPI.ts";
+import { JoinChannelModal } from "./JoinChannelModal.tsx";
 
 type Props = {
-  streams: Stream[] | null;
   onClick?: (stream: Stream) => void;
   onBroadcastAll?: () => void;
   onJoinAll?: () => void;
 };
+const PINNED_KEY = "pinned_key";
+function usePinnedChannels() {
+  const [pinned, setPinned] = useState<Map<string, Stream>>(new Map());
 
+  const add = (stream: Stream) =>
+    setPinned(new Map(pinned).set(stream.user_name, stream));
+
+  useEffect(() => {
+    if (pinned.size) {
+      const pinnedArray = Array.from(pinned.keys());
+      localStorage.setItem(PINNED_KEY, JSON.stringify(pinnedArray));
+    }
+  }, [pinned]);
+
+  useEffect(() => {
+    const lsPinned = localStorage.getItem(PINNED_KEY);
+    if (lsPinned) {
+      const lsPinnedMap = (JSON.parse(lsPinned) as Stream[]).reduce(
+        (map, stream) => map.set(stream.user_name, stream),
+        new Map(),
+      );
+      setPinned(lsPinnedMap);
+    }
+  }, []);
+  return {
+    pinned,
+    add,
+  };
+}
 export function StreamSidebar(
-  { streams, onClick, onBroadcastAll, onJoinAll }: Props,
+  { onClick, onBroadcastAll, onJoinAll }: Props,
 ) {
   const [collapsed, setCollapsed] = useState(false);
+  const [following] = useFollowing();
+  // const [pinnedChannels, setPinnedChannels] = useState<Stream[]>([]);
+  const { pinned, add: addPinned } = usePinnedChannels();
+  const [joinChannelOpen, setJoinChannelOpen] = useState(false);
+  const { getStream } = useTwitchAPI();
 
+  console.log({ pinned });
   return (
     <aside
       className={`h-full bg-zinc-900 border-r border-zinc-700 flex flex-col flex-shrink-0 transition-all duration-200 ${
@@ -55,14 +91,14 @@ export function StreamSidebar(
         ? (
           <>
             <div className="flex-1 overflow-y-auto flex flex-col items-center py-2 gap-2">
-              {streams === null
+              {following === null
                 ? Array.from({ length: 6 }).map((_, i) => (
                   <div
                     key={i}
                     className="w-8 h-8 rounded-full bg-zinc-700 animate-pulse flex-shrink-0"
                   />
                 ))
-                : streams.map((stream) => (
+                : following.map((stream) => (
                   <button
                     key={stream.id}
                     type="button"
@@ -80,8 +116,28 @@ export function StreamSidebar(
                     <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-zinc-900" />
                   </button>
                 ))}
+              <button
+                type="button"
+                onClick={() => setJoinChannelOpen(true)}
+                className="w-8 h-8 flex items-center justify-center cursor-pointer flex-shrink-0"
+                title="Join a channel"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="w-6 h-6 text-zinc-400 hover:text-zinc-100 transition-colors"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </button>
             </div>
-            {streams && streams.length > 0 && onJoinAll && (
+            {following && following.length > 0 && (
               <div className="border-t border-zinc-700 flex flex-col items-center py-2 gap-2">
                 <button
                   type="button"
@@ -130,7 +186,7 @@ export function StreamSidebar(
         : (
           <>
             <div className="flex-1 overflow-y-auto">
-              {streams === null
+              {following === null
                 ? (
                   Array.from({ length: 6 }).map((_, i) => (
                     <div
@@ -148,12 +204,12 @@ export function StreamSidebar(
                 )
                 : (
                   <>
-                    {streams.length === 0 && (
+                    {following.length === 0 && (
                       <p className="text-zinc-500 text-sm px-4 py-3">
                         No live channels
                       </p>
                     )}
-                    {streams.map((stream) => (
+                    {following.map((stream) => (
                       <button
                         key={stream.id}
                         type="button"
@@ -190,10 +246,76 @@ export function StreamSidebar(
                     ))}
                   </>
                 )}
+              {pinned.size > 0 && (
+                <>
+                  <div className="py-3 px-2 border-t border-zinc-700">
+                    <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider px-2">
+                      Pinned Channels
+                    </h2>
+                  </div>
+                  {Array.from(pinned.values()).map((stream) => (
+                    <button
+                      key={stream.id}
+                      type="button"
+                      onClick={() => onClick?.(stream)}
+                      className="w-full flex items-center gap-3 px-4 py-2 hover:bg-zinc-800 transition-colors cursor-pointer text-left"
+                    >
+                      <div className="relative flex-shrink-0">
+                        <img
+                          src={stream.thumbnail_url
+                            .replace("{width}", "70")
+                            .replace("{height}", "70")}
+                          alt={stream.user_name}
+                          className="w-9 h-9 rounded-full object-cover"
+                        />
+                        <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-zinc-900" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="text-zinc-100 text-sm font-medium truncate">
+                          {stream.user_name}
+                        </p>
+                        <p className="text-zinc-400 text-xs truncate">
+                          {stream.game_name}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0 flex items-center gap-1">
+                        <span className="inline-block w-2 h-2 rounded-full bg-red-500" />
+                        <span className="text-zinc-400 text-xs">
+                          {stream.viewer_count >= 1000
+                            ? `${(stream.viewer_count / 1000).toFixed(1)}K`
+                            : stream.viewer_count.toLocaleString()}
+                        </span>
+                      </div>
+                    </button>
+                  ))}
+                </>
+              )}
             </div>
-            {streams && streams.length > 0 && onJoinAll && (
+            {following && following.length > 0 && (
               <div className="border-t border-zinc-700">
                 <div className="px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={() => setJoinChannelOpen(true)}
+                    className="w-full flex items-center justify-center gap-1.5 text-purple-400 hover:text-purple-300 text-sm font-medium py-2 rounded transition-colors cursor-pointer"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="w-4 h-4"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <line x1="12" y1="5" x2="12" y2="19" />
+                      <line x1="5" y1="12" x2="19" y2="12" />
+                    </svg>
+                    Pin Channel
+                  </button>
+                </div>
+                <div className="px-4 py-3 border-t border-zinc-700">
                   <button
                     type="button"
                     onClick={onBroadcastAll}
@@ -202,19 +324,20 @@ export function StreamSidebar(
                     Broadcast All
                   </button>
                 </div>
-                <div className="px-4 py-3 border-t border-zinc-700">
-                  <button
-                    type="button"
-                    onClick={onJoinAll}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2 rounded transition-colors cursor-pointer"
-                  >
-                    Join All
-                  </button>
-                </div>
               </div>
             )}
           </>
         )}
+      <JoinChannelModal
+        open={joinChannelOpen}
+        onClose={() => setJoinChannelOpen(false)}
+        onJoin={async (channel) => {
+          const streams = await getStream(channel);
+          if (streams && streams.length > 0) {
+            addPinned(streams[0]);
+          }
+        }}
+      />
     </aside>
   );
 }

@@ -1,7 +1,13 @@
-import { useTwitchCtxActions } from "../context/twitchctx.tsx";
+import { useClientID } from "../hooks/useClientID.ts";
+import { useOAuth } from "../hooks/useOAuth.ts";
 
 export function LogoutBtn() {
-  const { logout } = useTwitchCtxActions();
+  const clientID = useClientID();
+  const oauth = useOAuth();
+  const logout = () => {
+    clientID.clear();
+    oauth.clear();
+  };
   return (
     <button
       type="button"

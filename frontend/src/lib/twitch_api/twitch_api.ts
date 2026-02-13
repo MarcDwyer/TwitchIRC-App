@@ -1,6 +1,7 @@
 import type {
-  UserInfo,
   LiveFollowedStreamsResponse,
+  Stream,
+  UserInfo,
 } from "./twitch_api_types.ts";
 const baseUrl = "https://api.twitch.tv/helix";
 
@@ -49,7 +50,9 @@ export class TwitchAPI {
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(
-        `Failed to fetch user info: ${response.status} ${JSON.stringify(error)}`,
+        `Failed to fetch user info: ${response.status} ${
+          JSON.stringify(error)
+        }`,
       );
     }
 
@@ -83,9 +86,39 @@ export class TwitchAPI {
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(
-        `Failed to fetch live followed streams: ${response.status} ${JSON.stringify(error)}`,
+        `Failed to fetch live followed streams: ${response.status} ${
+          JSON.stringify(error)
+        }`,
       );
     }
     return (await response.json()) as LiveFollowedStreamsResponse;
+  }
+
+  async getStreamByLogin(login: string | string[]): Promise<Stream[]> {
+    const logins = Array.isArray(login) ? login : [login];
+    const params = new URLSearchParams();
+    for (const l of logins) {
+      params.append("user_login", l);
+    }
+
+    const response = await fetch(
+      `${baseUrl}/streams?${params.toString()}`,
+      {
+        headers: {
+          "Client-ID": this.clientId,
+          Authorization: `Bearer ${this.oauthToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        `Failed to fetch stream: ${response.status} ${JSON.stringify(error)}`,
+      );
+    }
+
+    const data = await response.json();
+    return data.data as Stream[];
   }
 }
