@@ -18,41 +18,37 @@ export function useTwitchAPI() {
     }
   }, [clientID, token, _setTwitchAPI, twitchAPI]);
 
-  const _getStream = useCallback(
-    async (name: string | string[]): Promise<Stream[]> => {
-      if (!twitchAPI) {
-        return [];
-      }
+  const _getStreams = useCallback(
+    async (names: string[] | string): Promise<Stream[]> => {
       try {
-        const names = Array.isArray(name)
-          ? name.map((n) => n.toLowerCase())
-          : name.toLowerCase();
-        return await twitchAPI.getStreamByLogin(names);
+        if (!twitchAPI) throw "TwitchAPI not yet set";
+        const streams = await twitchAPI.getStreamByLogin(names);
+        if (!streams.length) {
+          throw "Either streams aren't live or do not exist";
+        }
+        return streams;
       } catch (e) {
-        return [];
+        throw e;
       }
     },
     [twitchAPI],
   );
-  const { execute: getStream, loading: getStreamLoading } = useAsync(
-    _getStream,
-  );
 
-  const _getFollowing = useCallback(async () => {
-    if (!twitchAPI) return null;
-    const followers = await twitchAPI?.getLiveFollowedChannels();
-    return followers.data;
+  const streams = useAsync(_getStreams);
+
+  const getFollowing = useCallback(async () => {
+    try {
+      if (!twitchAPI) throw "TwitchAPI not yet set";
+      const followers = await twitchAPI.getLiveFollowedChannels();
+      return followers.data;
+    } catch (e) {
+      throw e;
+    }
   }, [twitchAPI]);
-
-  const { execute: getFollowing, loading: getFollowingLoading } = useAsync(
-    _getFollowing,
-  );
 
   return {
     twitchAPI,
-    getStream,
-    getStreamLoading,
+    streams,
     getFollowing,
-    getFollowingLoading,
   };
 }

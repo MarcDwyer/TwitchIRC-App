@@ -7,15 +7,16 @@ export function useAsync<T, Args extends unknown[]>(
   const [error, setError] = useState<string | null>(null);
 
   const execute = useCallback(
-    async (...args: Args): Promise<T | null> => {
+    async (...args: Args): Promise<T> => {
       setLoading(true);
-      setError(null);
       try {
         const result = await fn(...args);
+        setError(null);
         return result;
       } catch (e) {
-        setError(e instanceof Error ? e.message : "Something went wrong");
-        return null;
+        const msg = e instanceof Error ? e.message : String(e);
+        setError(msg);
+        throw e;
       } finally {
         setLoading(false);
       }
@@ -23,5 +24,5 @@ export function useAsync<T, Args extends unknown[]>(
     [fn],
   );
 
-  return { execute, loading, error };
+  return { execute, loading, error, setError };
 }

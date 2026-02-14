@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { Stream } from "../lib/twitch_api/twitch_api_types.ts";
 import { useTwitchAPI } from "./useTwitchAPI.ts";
 
-export function useFollowing(): [Stream[] | null, boolean] {
+export function useFollowing() {
   const [following, setFollowing] = useState<Stream[] | null>(null);
-  const { getFollowing, getFollowingLoading } = useTwitchAPI();
+  const { getFollowing } = useTwitchAPI();
 
   useEffect(() => {
     if (!following) {
-      getFollowing().then(setFollowing);
+      getFollowing().then(setFollowing).catch(() => {});
     }
   }, [following, getFollowing]);
 
@@ -16,7 +16,7 @@ export function useFollowing(): [Stream[] | null, boolean] {
     let refresh: number;
     if (following) {
       refresh = setInterval(() => {
-        getFollowing().then(setFollowing);
+        getFollowing().then(setFollowing).catch(() => {});
       }, 60000 * 3);
     }
     return function () {
@@ -24,5 +24,5 @@ export function useFollowing(): [Stream[] | null, boolean] {
     };
   }, [getFollowing, following]);
 
-  return [following, getFollowingLoading];
+  return following;
 }

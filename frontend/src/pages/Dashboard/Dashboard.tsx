@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Navbar } from "../../components/Navbar.tsx";
-import { StreamSidebar } from "../../components/StreamSidebar.tsx";
+import { StreamSidebar } from "../../components/StreamSidebar";
 import { Stream } from "../../lib/twitch_api/twitch_api_types.ts";
 import { TwitchViewer } from "../../components/TwitchViewer/TwitchViewer.tsx";
 import { useTwitchIRC } from "../../hooks/useTwitchIRC.ts";
