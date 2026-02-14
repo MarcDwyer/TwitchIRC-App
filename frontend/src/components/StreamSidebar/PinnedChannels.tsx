@@ -1,10 +1,10 @@
-import { Stream } from "../../lib/twitch_api/twitch_api_types.ts";
+import { UserInfo } from "../../lib/twitch_api/twitch_api_types.ts";
 
 type Props = {
-  pinned: Map<string, Stream>;
+  pinned: Map<string, UserInfo>;
   collapsed: boolean;
-  onClick?: (stream: Stream) => void;
-  onRemove?: (streamName: string) => void;
+  onClick?: (user: UserInfo) => void;
+  onRemove?: (login: string) => void;
 };
 
 export function PinnedChannels(
@@ -15,22 +15,19 @@ export function PinnedChannels(
   if (collapsed) {
     return (
       <>
-        {Array.from(pinned.values()).map((stream) => (
+        {Array.from(pinned.values()).map((user) => (
           <button
-            key={stream.id}
+            key={user.id}
             type="button"
-            onClick={() => onClick?.(stream)}
+            onClick={() => onClick?.(user)}
             className="relative cursor-pointer flex-shrink-0"
-            title={stream.user_name}
+            title={user.display_name}
           >
             <img
-              src={stream.thumbnail_url
-                .replace("{width}", "70")
-                .replace("{height}", "70")}
-              alt={stream.user_name}
+              src={user.profile_image_url}
+              alt={user.display_name}
               className="w-8 h-8 rounded-full object-cover hover:ring-2 hover:ring-purple-500 transition-all"
             />
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-zinc-900" />
           </button>
         ))}
       </>
@@ -44,27 +41,24 @@ export function PinnedChannels(
           Pinned Channels
         </h2>
       </div>
-      {Array.from(pinned.values()).map((stream) => (
+      {Array.from(pinned.values()).map((user) => (
         <button
-          key={stream.id}
+          key={user.id}
           type="button"
-          onClick={() => onClick?.(stream)}
+          onClick={() => onClick?.(user)}
           className="w-full flex items-center gap-3 px-4 py-2 hover:bg-zinc-800 transition-colors cursor-pointer text-left group"
         >
           <div className="relative flex-shrink-0">
             <img
-              src={stream.thumbnail_url
-                .replace("{width}", "70")
-                .replace("{height}", "70")}
-              alt={stream.user_name}
+              src={user.profile_image_url}
+              alt={user.display_name}
               className="w-9 h-9 rounded-full object-cover"
             />
-            <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-red-500 rounded-full border-2 border-zinc-900 group-hover:hidden" />
             <span
               role="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onRemove?.(stream.user_name);
+                onRemove?.(user.login);
               }}
               className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               title="Unpin channel"
@@ -86,19 +80,8 @@ export function PinnedChannels(
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-zinc-100 text-sm font-medium truncate">
-              {stream.user_name}
+              {user.display_name}
             </p>
-            <p className="text-zinc-400 text-xs truncate">
-              {stream.game_name}
-            </p>
-          </div>
-          <div className="flex-shrink-0 flex items-center gap-1">
-            <span className="inline-block w-2 h-2 rounded-full bg-red-500" />
-            <span className="text-zinc-400 text-xs">
-              {stream.viewer_count >= 1000
-                ? `${(stream.viewer_count / 1000).toFixed(1)}K`
-                : stream.viewer_count.toLocaleString()}
-            </span>
           </div>
         </button>
       ))}

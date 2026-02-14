@@ -1,7 +1,7 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useTwitchCtx } from "../context/twitchctx.tsx";
 import { createTwitchAPI } from "../lib/twitch_api/twitch_api.ts";
-import { Stream } from "../lib/twitch_api/twitch_api_types.ts";
+import { Stream, UserInfo } from "../lib/twitch_api/twitch_api_types.ts";
 import { useAsync } from "./useAsync.ts";
 
 export function useTwitchAPI() {
@@ -36,6 +36,17 @@ export function useTwitchAPI() {
 
   const streams = useAsync(_getStreams);
 
+  const _getUser = useCallback(
+    async (names: string[] | string): Promise<UserInfo[]> => {
+      if (!twitchAPI) throw "TwitchAPI not yet set";
+      const users = await twitchAPI.getUserByLogin(names);
+      return users;
+    },
+    [twitchAPI],
+  );
+
+  const users = useAsync(_getUser);
+
   const getFollowing = useCallback(async () => {
     try {
       if (!twitchAPI) throw "TwitchAPI not yet set";
@@ -49,6 +60,7 @@ export function useTwitchAPI() {
   return {
     twitchAPI,
     streams,
+    users,
     getFollowing,
   };
 }

@@ -94,6 +94,34 @@ export class TwitchAPI {
     return (await response.json()) as LiveFollowedStreamsResponse;
   }
 
+  async getUserByLogin(login: string | string[]): Promise<UserInfo[]> {
+    const logins = Array.isArray(login) ? login : [login];
+    const params = new URLSearchParams();
+    for (const l of logins) {
+      params.append("login", l);
+    }
+
+    const response = await fetch(
+      `${baseUrl}/users?${params.toString()}`,
+      {
+        headers: {
+          "Client-ID": this.clientId,
+          Authorization: `Bearer ${this.oauthToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        `Failed to fetch user: ${response.status} ${JSON.stringify(error)}`,
+      );
+    }
+
+    const data = await response.json();
+    return data.data as UserInfo[];
+  }
+
   async getStreamByLogin(login: string | string[]): Promise<Stream[]> {
     const logins = Array.isArray(login) ? login : [login];
     const params = new URLSearchParams();

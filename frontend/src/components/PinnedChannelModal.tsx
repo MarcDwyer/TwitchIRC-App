@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { useTwitchAPI } from "../hooks/useTwitchAPI.ts";
-import { Stream } from "../lib/twitch_api/twitch_api_types.ts";
+import { UserInfo } from "../lib/twitch_api/twitch_api_types.ts";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  onPin: (stream: Stream) => void;
+  onPin: (user: UserInfo) => void;
 };
 
 export function PinnedChannelModal(
@@ -15,7 +15,7 @@ export function PinnedChannelModal(
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { streams } = useTwitchAPI();
+  const { users } = useTwitchAPI();
 
   useEffect(() => {
     if (open) {
@@ -33,7 +33,8 @@ export function PinnedChannelModal(
     if (!channel.trim()) return;
     try {
       setError(null);
-      const data = await streams.execute(channel);
+      const data = await users.execute(channel);
+      if (!data.length) throw "No user exists";
       onPin(data[0]);
       onClose();
     } catch (err) {
@@ -105,10 +106,10 @@ export function PinnedChannelModal(
             </button>
             <button
               type="submit"
-              disabled={!channel.trim() || streams.loading}
+              disabled={!channel.trim() || users.loading}
               className="flex items-center gap-1.5 px-4 py-2 text-sm text-purple-400 hover:text-purple-300 disabled:opacity-50 disabled:cursor-not-allowed rounded transition-colors cursor-pointer"
             >
-              {streams.loading
+              {users.loading
                 ? (
                   <svg
                     className="w-4 h-4 animate-spin"
@@ -146,7 +147,7 @@ export function PinnedChannelModal(
                     <line x1="5" y1="12" x2="19" y2="12" />
                   </svg>
                 )}
-              {streams.loading ? "Pinning..." : "Pin Channel"}
+              {users.loading ? "Pinning..." : "Pin Channel"}
             </button>
           </div>
         </form>

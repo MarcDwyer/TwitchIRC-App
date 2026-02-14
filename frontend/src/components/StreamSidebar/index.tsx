@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Stream } from "../../lib/twitch_api/twitch_api_types.ts";
+import { Stream, UserInfo } from "../../lib/twitch_api/twitch_api_types.ts";
 import { useFollowing } from "../../hooks/useFollowing.ts";
 import { usePinned } from "../../hooks/usePinned.ts";
 import { PinnedChannelModal } from "../PinnedChannelModal.tsx";
@@ -7,19 +7,19 @@ import { PinnedChannels } from "./PinnedChannels.tsx";
 
 type Props = {
   onClick?: (stream: Stream) => void;
+  onPinnedClick?: (user: UserInfo) => void;
   onBroadcastAll?: () => void;
   onJoinAll?: () => void;
 };
 
 export function StreamSidebar(
-  { onClick, onBroadcastAll, onJoinAll }: Props,
+  { onClick, onPinnedClick, onBroadcastAll, onJoinAll }: Props,
 ) {
   const [collapsed, setCollapsed] = useState(false);
   const following = useFollowing();
   const [pinnedModalOpen, setPinnedModalOpen] = useState(false);
   const { pinned, addPinned, removePinned } = usePinned();
 
-  console.log({ pinned });
   return (
     <aside
       className={`h-full bg-zinc-900 border-r border-zinc-700 flex flex-col flex-shrink-0 transition-all duration-200 ${
@@ -90,7 +90,7 @@ export function StreamSidebar(
               <PinnedChannels
                 pinned={pinned}
                 collapsed={collapsed}
-                onClick={onClick}
+                onClick={onPinnedClick}
                 onRemove={removePinned}
               />
               <button
@@ -226,7 +226,7 @@ export function StreamSidebar(
               <PinnedChannels
                 pinned={pinned}
                 collapsed={collapsed}
-                onClick={onClick}
+                onClick={onPinnedClick}
                 onRemove={removePinned}
               />
             </div>
