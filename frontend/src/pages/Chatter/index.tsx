@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Navbar } from "./components/Navbar.tsx";
 import { StreamSidebar } from "./components/StreamSidebar/index.tsx";
 import { TwitchViewer } from "./components/TwitchViewer/index.tsx";
-import { BroadcastModal } from "./components/BroadcastModal.tsx";
 import { useUserInfo } from "./hooks/useUserInfo.ts";
 import { useViewing } from "./context/chatterctx.tsx";
 
@@ -80,11 +79,13 @@ export function Chatter() {
             )}
         </main>
       </div>
-      <BroadcastModal
+      {
+        /*<BroadcastModal
         open={broadcastOpen}
         onClose={() => setBroadcastOpen(false)}
         onSend={() => {}}
-      />
+      />*/
+      }
     </div>
   );
 }

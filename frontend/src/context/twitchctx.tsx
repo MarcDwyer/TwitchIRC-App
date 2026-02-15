@@ -27,7 +27,6 @@ const InitialOAuth = {
 const InitialTwitchState: TwitchContextType = {
   clientID: null,
   oauth: InitialOAuth,
-  twitchAPI: null,
   _setClientID: () => {},
   _setOAuth: () => {},
 };

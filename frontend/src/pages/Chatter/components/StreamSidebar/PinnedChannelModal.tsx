@@ -1,20 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import { useTwitchAPI } from "@Chatter/hooks/useTwitchAPI.ts";
-import { usePinned } from "@Chatter/hooks/usePinned.ts";
+import { UserInfo } from "@/lib/twitch_api/twitch_api_types.ts";
 
 type Props = {
   open: boolean;
   onClose: () => void;
+  addPinned: (user: UserInfo) => void;
 };
 
-export function PinnedChannelModal({ open, onClose }: Props) {
+export function PinnedChannelModal({ open, onClose, addPinned }: Props) {
   const [channel, setChannel] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
 
   const { users } = useTwitchAPI();
-
-  const { addPinned } = usePinned();
 
   useEffect(() => {
     if (open) {

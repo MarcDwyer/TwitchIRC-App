@@ -1,20 +1,20 @@
 import { useState } from "react";
-import { usePinned } from "@Chatter/hooks/usePinned.ts";
-import { PinnedChannelModal } from "@Chatter/components/PinnedChannelModal.tsx";
+import { PinnedChannelModal } from "./PinnedChannelModal.tsx";
 import { FollowerChannels } from "./FollowerChannels.tsx";
 import { PinnedChannels } from "./PinnedChannels.tsx";
 import { useViewing } from "@Chatter/context/chatterctx.tsx";
+import { usePinned } from "../../hooks/usePinned.ts";
 
 type Props = {
   onBroadcastAll?: () => void;
-  onJoinAll?: () => void;
 };
 
-export function StreamSidebar({ onBroadcastAll, onJoinAll }: Props) {
+export function StreamSidebar({ onBroadcastAll }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [pinnedModalOpen, setPinnedModalOpen] = useState(false);
-  const { pinned, addPinned, removePinned } = usePinned();
   const { addViewing } = useViewing();
+
+  const { addPinned, pinned, removePinned, checkPinnedLive } = usePinned();
 
   return (
     <aside
@@ -54,21 +54,78 @@ export function StreamSidebar({ onBroadcastAll, onJoinAll }: Props) {
         </button>
       </div>
 
+      <div
+        className={`flex-1 overflow-y-auto ${
+          collapsed ? "flex flex-col items-center py-2 gap-2" : ""
+        }`}
+      >
+        <FollowerChannels collapsed={collapsed} onClick={addViewing} />
+        <PinnedChannels
+          pinned={pinned}
+          removePinned={removePinned}
+          collapsed={collapsed}
+          checkPinnedLive={checkPinnedLive}
+        />
+      </div>
+
       {collapsed
         ? (
-          <>
-            <div className="flex-1 overflow-y-auto flex flex-col items-center py-2 gap-2">
-              <FollowerChannels collapsed={collapsed} onClick={addViewing} />
-              <PinnedChannels collapsed={collapsed} />
+          <div className="border-t border-zinc-700 flex flex-col items-center py-2 gap-2">
+            {
+              /*<button
+              type="button"
+              onClick={onBroadcastAll}
+              className="w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition-colors cursor-pointer"
+              title="Broadcast All"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M22 2 11 13" />
+                <path d="M22 2 15 22 11 13 2 9z" />
+              </svg>
+            </button>*/
+            }
+            <button
+              type="button"
+              onClick={() => setPinnedModalOpen(true)}
+              className="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-colors cursor-pointer"
+              title="Pin Channel"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          </div>
+        )
+        : (
+          <div className="border-t border-zinc-700">
+            <div className="px-4 py-3">
               <button
                 type="button"
                 onClick={() => setPinnedModalOpen(true)}
-                className="w-8 h-8 flex items-center justify-center cursor-pointer flex-shrink-0"
-                title="Join a channel"
+                className="w-full flex items-center justify-center gap-1.5 text-purple-400 hover:text-purple-300 text-sm font-medium py-2 rounded transition-colors cursor-pointer"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-6 h-6 text-zinc-400 hover:text-zinc-100 transition-colors"
+                  className="w-4 h-4"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
@@ -79,96 +136,27 @@ export function StreamSidebar({ onBroadcastAll, onJoinAll }: Props) {
                   <line x1="12" y1="5" x2="12" y2="19" />
                   <line x1="5" y1="12" x2="19" y2="12" />
                 </svg>
+                Pin Channel
               </button>
             </div>
-            <div className="border-t border-zinc-700 flex flex-col items-center py-2 gap-2">
+            {
+              /*<div className="px-4 py-3 border-t border-zinc-700">
               <button
                 type="button"
                 onClick={onBroadcastAll}
-                className="w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition-colors cursor-pointer"
-                title="Broadcast All"
+                className="w-full bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 rounded transition-colors cursor-pointer"
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M22 2 11 13" />
-                  <path d="M22 2 15 22 11 13 2 9z" />
-                </svg>
+                Broadcast All
               </button>
-              <button
-                type="button"
-                onClick={onJoinAll}
-                className="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-colors cursor-pointer"
-                title="Join All"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              </button>
-            </div>
-          </>
-        )
-        : (
-          <>
-            <div className="flex-1 overflow-y-auto">
-              <FollowerChannels collapsed={collapsed} onClick={addViewing} />
-              <PinnedChannels collapsed={collapsed} />
-            </div>
-            <div className="border-t border-zinc-700">
-              <div className="px-4 py-3">
-                <button
-                  type="button"
-                  onClick={() => setPinnedModalOpen(true)}
-                  className="w-full flex items-center justify-center gap-1.5 text-purple-400 hover:text-purple-300 text-sm font-medium py-2 rounded transition-colors cursor-pointer"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="w-4 h-4"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                  </svg>
-                  Pin Channel
-                </button>
-              </div>
-              <div className="px-4 py-3 border-t border-zinc-700">
-                <button
-                  type="button"
-                  onClick={onBroadcastAll}
-                  className="w-full bg-red-600 hover:bg-red-700 text-white text-sm font-medium py-2 rounded transition-colors cursor-pointer"
-                >
-                  Broadcast All
-                </button>
-              </div>
-            </div>
-          </>
+            </div>*/
+            }
+          </div>
         )}
+
       <PinnedChannelModal
         open={pinnedModalOpen}
         onClose={() => setPinnedModalOpen(false)}
+        addPinned={addPinned}
       />
     </aside>
   );

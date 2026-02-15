@@ -6,72 +6,47 @@ type Props = {
   onClick?: (stream: Stream) => void;
 };
 
-export function FollowerChannels({ collapsed, onClick }: Props) {
-  const following = useFollowing();
+function Collapsed(
+  { following, onClick }: {
+    following: Stream[];
+    onClick?: (stream: Stream) => void;
+  },
+) {
+  return (
+    <>
+      {following.map((stream) => (
+        <button
+          key={stream.id}
+          type="button"
+          onClick={() => onClick?.(stream)}
+          className="relative cursor-pointer flex-shrink-0"
+          title={stream.user_name}
+        >
+          <img
+            src={stream.thumbnail_url
+              .replace("{width}", "70")
+              .replace("{height}", "70")}
+            alt={stream.user_name}
+            className="w-8 h-8 rounded-full object-cover hover:ring-2 hover:ring-purple-500 transition-all"
+          />
+          <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-zinc-900" />
+        </button>
+      ))}
+    </>
+  );
+}
 
-  if (following === null) {
-    if (collapsed) {
-      return (
-        <>
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="w-8 h-8 rounded-full bg-zinc-700 animate-pulse flex-shrink-0"
-            />
-          ))}
-        </>
-      );
-    }
-
-    return (
-      <>
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="w-full flex items-center gap-3 px-4 py-2 animate-pulse"
-          >
-            <div className="w-9 h-9 rounded-full bg-zinc-700 flex-shrink-0" />
-            <div className="min-w-0 flex-1 space-y-1.5">
-              <div className="h-3 w-24 bg-zinc-700 rounded" />
-              <div className="h-2.5 w-16 bg-zinc-700 rounded" />
-            </div>
-            <div className="h-2.5 w-8 bg-zinc-700 rounded flex-shrink-0" />
-          </div>
-        ))}
-      </>
-    );
-  }
-
-  if (following.length === 0 && !collapsed) {
+function Uncollapsed(
+  { following, onClick }: {
+    following: Stream[];
+    onClick?: (stream: Stream) => void;
+  },
+) {
+  if (following.length === 0) {
     return (
       <p className="text-zinc-500 text-sm px-4 py-3">
         No live channels
       </p>
-    );
-  }
-
-  if (collapsed) {
-    return (
-      <>
-        {following.map((stream) => (
-          <button
-            key={stream.id}
-            type="button"
-            onClick={() => onClick?.(stream)}
-            className="relative cursor-pointer flex-shrink-0"
-            title={stream.user_name}
-          >
-            <img
-              src={stream.thumbnail_url
-                .replace("{width}", "70")
-                .replace("{height}", "70")}
-              alt={stream.user_name}
-              className="w-8 h-8 rounded-full object-cover hover:ring-2 hover:ring-purple-500 transition-all"
-            />
-            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-zinc-900" />
-          </button>
-        ))}
-      </>
     );
   }
 
@@ -114,4 +89,47 @@ export function FollowerChannels({ collapsed, onClick }: Props) {
       ))}
     </>
   );
+}
+
+export function FollowerChannels({ collapsed, onClick }: Props) {
+  const following = useFollowing();
+
+  if (following === null) {
+    if (collapsed) {
+      return (
+        <>
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div
+              key={i}
+              className="w-8 h-8 rounded-full bg-zinc-700 animate-pulse flex-shrink-0"
+            />
+          ))}
+        </>
+      );
+    }
+
+    return (
+      <>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div
+            key={i}
+            className="w-full flex items-center gap-3 px-4 py-2 animate-pulse"
+          >
+            <div className="w-9 h-9 rounded-full bg-zinc-700 flex-shrink-0" />
+            <div className="min-w-0 flex-1 space-y-1.5">
+              <div className="h-3 w-24 bg-zinc-700 rounded" />
+              <div className="h-2.5 w-16 bg-zinc-700 rounded" />
+            </div>
+            <div className="h-2.5 w-8 bg-zinc-700 rounded flex-shrink-0" />
+          </div>
+        ))}
+      </>
+    );
+  }
+
+  if (collapsed) {
+    return <Collapsed following={following} onClick={onClick} />;
+  }
+
+  return <Uncollapsed following={following} onClick={onClick} />;
 }
