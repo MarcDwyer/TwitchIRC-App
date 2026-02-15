@@ -6,6 +6,8 @@
     "lint": "deno lint && deno run -A npm:eslint src/"
   },
   "imports": {
+    "@Chatter/": "./src/pages/Chatter/",
+    "@/": "./src/",
     "@eslint/js": "npm:@eslint/js@^10.0.1",
     "eslint": "npm:eslint@^10.0.0",
     "eslint-plugin-react-hooks": "npm:eslint-plugin-react-hooks@^7.0.1",

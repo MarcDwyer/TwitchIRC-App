@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { handleMessage, HandleMsgCallbacks } from "../util/handleMessage.ts";
+import { handleMessage, HandleMsgCallbacks } from "@/util/handleMessage.ts";
 import { useUserInfo } from "./useUserInfo.ts";
-import { delay } from "../util/delay.ts";
-import { createIRCMessage } from "../util/createIRCMessage.ts";
-import { IrcMessage } from "../types/twitch_data.ts";
+import { delay } from "@Chatter/util/delay.ts";
+import { createIRCMessage } from "@Chatter/util/createIRCMessage.ts";
+import { IrcMessage } from "@/types/twitch_data.ts";
+import { useChatterCtx } from "@Chatter/context/chatterctx.tsx";
 
 const addUserState = (msg: IrcMessage, userState: IrcMessage | null) => {
   if (!userState) return msg;
@@ -15,10 +16,10 @@ const isOlderThanMins = (timestamp: number, mins: number) =>
 
 type NewMessagesCB = (msgs: IrcMessage[]) => void;
 export function useChat(
-  ws: WebSocket,
   channel: string,
   newMsgsCB?: NewMessagesCB,
 ) {
+  const { ws } = useChatterCtx();
   const [chatters, setChatters] = useState<Map<string, number>>(new Map());
   const [messages, setMessages] = useState<IrcMessage[]>([]);
   const [joined, setJoined] = useState<boolean>(false);
@@ -66,7 +67,7 @@ export function useChat(
   }, [newMsgsCB, updateChatters]);
 
   const send = useCallback(
-    (msg: string, broadcast: boolean) => {
+    (msg: string) => {
       if (!userInfo || !ws) return;
       const ircMsg = createIRCMessage(
         msg,
@@ -75,13 +76,12 @@ export function useChat(
       );
       addUserState(ircMsg, userState.current);
       setMessages((prev) => [...prev, ircMsg]);
-      if (broadcast) {
-        ws.send(`PRIVMSG ${channel} :${msg}`);
-      }
+      ws.send(`PRIVMSG ${channel} :${msg}`);
     },
     [ws, userInfo, channel],
   );
   useEffect(() => {
+    if (!ws) return;
     const ref = ({ data }: MessageEvent<string>) => {
       const cbs: HandleMsgCallbacks = {
         PRIVMSG: (msg) => {
@@ -104,7 +104,7 @@ export function useChat(
     ws.addEventListener("message", ref);
 
     return function () {
-      ws.removeEventListener("message", ref);
+      ws?.removeEventListener("message", ref);
     };
   }, [ws, channel, batchMsgs]);
 
@@ -118,7 +118,7 @@ export function useChat(
     [userInfo],
   );
   useEffect(() => {
-    if (!joined) {
+    if (!joined && ws) {
       ws.send(`Join ${channel}`);
     }
   }, [joined, ws, channel]);

@@ -4,11 +4,8 @@ import {
   ReactNode,
   SetStateAction,
   useContext,
-  useEffect,
   useState,
 } from "react";
-import { CLIENT_ID_KEY, OAUTH_KEY } from "../util/storageKeys.ts";
-import { TwitchAPI } from "../lib/twitch_api/twitch_api.ts";
 
 export type OAuth = {
   token: string | null;
@@ -19,8 +16,6 @@ export type OAuth = {
 export type TwitchContextType = {
   oauth: OAuth;
   _setOAuth: Dispatch<SetStateAction<OAuth>>;
-  twitchAPI: TwitchAPI | null;
-  _setTwitchAPI: Dispatch<SetStateAction<TwitchAPI | null>>;
   clientID: string | null;
   _setClientID: Dispatch<SetStateAction<string | null>>;
 };
@@ -33,7 +28,6 @@ const InitialTwitchState: TwitchContextType = {
   clientID: null,
   oauth: InitialOAuth,
   twitchAPI: null,
-  _setTwitchAPI: () => {},
   _setClientID: () => {},
   _setOAuth: () => {},
 };
@@ -49,7 +43,6 @@ export const TwitchProvider = ({
 }) => {
   const [clientID, _setClientID] = useState<string | null>(null);
   const [oauth, _setOAuth] = useState<OAuth>(InitialOAuth);
-  const [twitchAPI, _setTwitchAPI] = useState<TwitchAPI | null>(null);
 
   return (
     <TwitchContext.Provider
@@ -58,8 +51,6 @@ export const TwitchProvider = ({
         _setClientID,
         oauth,
         _setOAuth,
-        twitchAPI,
-        _setTwitchAPI,
       }}
     >
       {children}

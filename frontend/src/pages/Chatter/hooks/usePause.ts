@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { IrcMessage } from "../types/twitch_data.ts";
+import { IrcMessage } from "@/types/twitch_data.ts";
 
 export function usePause(messages: IrcMessage[]) {
   const chatRef = useRef<HTMLDivElement>(null);

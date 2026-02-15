@@ -1,19 +1,17 @@
-import { Stream } from "../../lib/twitch_api/twitch_api_types.ts";
-import { BroadcastHandler } from "../../pages/Dashboard/Dashboard.tsx";
-import { Chat } from "./Chat.tsx";
-import { StreamInfo } from "./StreamInfo.tsx";
+import { useViewing } from "@Chatter/context/chatterctx.tsx";
+import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
+import { Chat } from "./components/Chat.tsx";
+import { StreamInfo } from "./components/StreamInfo.tsx";
 import { useMemo } from "react";
 
 type Props = {
   stream: Stream;
-  ws: WebSocket | null;
-  part: (stream: Stream, channel: string) => void;
-  broadcastHandlers: React.RefObject<BroadcastHandler[]>;
 };
-export function TwitchViewer({ stream, part, ws, broadcastHandlers }: Props) {
+export function TwitchViewer({ stream }: Props) {
   const channel = useMemo(() => `#${stream.user_login}`, [stream]);
   const embedUrl =
     `https://player.twitch.tv/?channel=${stream.user_login}&parent=${location.hostname}`;
+  const { part } = useViewing();
   return (
     <div className="flex flex-col h-full basis-[calc(33.333%-0.25rem)] bg-zinc-800 rounded-lg border border-zinc-700">
       <div className="relative w-full aspect-video shrink-0 overflow-hidden max-h-180">
@@ -55,14 +53,7 @@ export function TwitchViewer({ stream, part, ws, broadcastHandlers }: Props) {
       </div>
       <div className="flex flex-col flex-1 min-h-0 overflow-y-auto">
         <StreamInfo stream={stream} />
-        {ws && (
-          <Chat
-            ws={ws}
-            channel={channel}
-            broadcastHandlers={broadcastHandlers}
-            stream={stream}
-          />
-        )}
+        <Chat channel={channel} stream={stream} />
       </div>
     </div>
   );

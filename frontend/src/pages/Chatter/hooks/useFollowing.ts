@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Stream } from "../lib/twitch_api/twitch_api_types.ts";
+import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
 import { useTwitchAPI } from "./useTwitchAPI.ts";
 
 export function useFollowing() {

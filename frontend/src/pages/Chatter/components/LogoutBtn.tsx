@@ -1,5 +1,5 @@
-import { useClientID } from "../hooks/useClientID.ts";
-import { useOAuth } from "../hooks/useOAuth.ts";
+import { useClientID } from "@/hooks/useClientID.ts";
+import { useOAuth } from "@/hooks/useOAuth.ts";
 
 export function LogoutBtn() {
   const clientID = useClientID();

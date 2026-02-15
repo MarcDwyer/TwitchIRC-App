@@ -1,35 +1,32 @@
 import { useEffect, useRef, useState } from "react";
-import { useChat } from "../../hooks/useChat.ts";
-import { BroadcastHandler } from "../../pages/Dashboard/Dashboard.tsx";
-import { useAutocomplete } from "../../hooks/useAutocomplete.ts";
-import { usePause } from "../../hooks/usePause.ts";
-import { Stream } from "../../lib/twitch_api/twitch_api_types.ts";
+import { useChat } from "@Chatter/hooks/useChat.ts";
+import { useAutocomplete } from "@Chatter/hooks/useAutocomplete.ts";
+import { usePause } from "@Chatter/hooks/usePause.ts";
+import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
 import { Autocomplete } from "./Autocomplete.tsx";
+import { useChatterCtx } from "@Chatter/context/chatterctx.tsx";
 
 type Props = {
-  ws: WebSocket;
   channel: string;
-  broadcastHandlers: React.RefObject<BroadcastHandler[]>;
   stream: Stream;
 };
 export type InputData = {
   text: string;
   startingIndex: number | null;
 };
-export function Chat({ ws, channel, broadcastHandlers }: Props) {
+export function Chat({ channel }: Props) {
   const [inputData, setInputData] = useState<InputData>({
     text: "",
     startingIndex: 0,
   });
 
+  const { broadcastHandlers } = useChatterCtx();
+
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { messages, send, isMentioned, chatters } = useChat(ws, channel);
+  const { messages, send, isMentioned, chatters } = useChat(channel);
 
-  const {
-    disableAutoComplete,
-    autocomplete,
-  } = useAutocomplete(inputData);
+  const { disableAutoComplete, autocomplete } = useAutocomplete(inputData);
 
   const onSelect = (user: string) => {
     const str = inputData.text;
@@ -45,7 +42,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
       startingIndex: pos,
       text: result,
     });
-    disableAutoComplete();
+    // disableAutoComplete();
     requestAnimationFrame(() => {
       inputRef.current?.setSelectionRange(pos, pos);
     });
@@ -55,7 +52,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
 
   useEffect(() => {
     const funcRef = (msg: string) => {
-      send(msg, true);
+      send(msg);
     };
     broadcastHandlers.current.push(funcRef);
     return function () {
@@ -89,10 +86,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
               {isSub && (
                 <span className="inline-block w-2 h-2 rounded-full bg-purple-500 mr-1 align-middle" />
               )}{" "}
-              <span
-                className="font-semibold"
-                style={{ color }}
-              >
+              <span className="font-semibold" style={{ color }}>
                 {msg.username}
               </span>
               <span className="text-zinc-500">:</span>{" "}
@@ -123,7 +117,7 @@ export function Chat({ ws, channel, broadcastHandlers }: Props) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            send(inputData.text, true);
+            send(inputData.text);
             setInputData({ text: "", startingIndex: 0 });
           }}
         >

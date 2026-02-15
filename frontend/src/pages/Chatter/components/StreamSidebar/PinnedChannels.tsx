@@ -1,15 +1,11 @@
-import { UserInfo } from "../../lib/twitch_api/twitch_api_types.ts";
+import { usePinned } from "@Chatter/hooks/usePinned.ts";
 
 type Props = {
-  pinned: Map<string, UserInfo>;
   collapsed: boolean;
-  onClick?: (user: UserInfo) => void;
-  onRemove?: (login: string) => void;
 };
 
-export function PinnedChannels(
-  { pinned, collapsed, onClick, onRemove }: Props,
-) {
+export function PinnedChannels({ collapsed }: Props) {
+  const { pinned, addPinned, removePinned } = usePinned();
   if (pinned.size === 0) return null;
 
   if (collapsed) {
@@ -19,7 +15,7 @@ export function PinnedChannels(
           <button
             key={user.id}
             type="button"
-            onClick={() => onClick?.(user)}
+            onClick={() => addPinned(user)}
             className="relative cursor-pointer flex-shrink-0"
             title={user.display_name}
           >
@@ -45,7 +41,7 @@ export function PinnedChannels(
         <button
           key={user.id}
           type="button"
-          onClick={() => onClick?.(user)}
+          onClick={() => addPinned(user)}
           className="w-full flex items-center gap-3 px-4 py-2 hover:bg-zinc-800 transition-colors cursor-pointer text-left group"
         >
           <div className="relative flex-shrink-0">
@@ -58,7 +54,7 @@ export function PinnedChannels(
               role="button"
               onClick={(e) => {
                 e.stopPropagation();
-                onRemove?.(user.login);
+                removePinned(user.login);
               }}
               className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               title="Unpin channel"

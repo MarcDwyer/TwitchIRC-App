@@ -1,4 +1,4 @@
-import { Stream } from "../../lib/twitch_api/twitch_api_types.ts";
+import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
 
 type Props = {
   stream: Stream;

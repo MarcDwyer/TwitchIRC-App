@@ -8,7 +8,11 @@
       "WebFetch(domain:zed.dev)",
       "Bash(dir:*)",
       "Bash(findstr:*)",
-      "WebFetch(domain:dev.twitch.tv)"
+      "WebFetch(domain:dev.twitch.tv)",
+      "mcp__ide__getDiagnostics",
+      "Bash(git mv:*)",
+      "Bash(npx tsc:*)",
+      "Bash(node_modules/.bin/tsc:*)"
     ]
   }
 }

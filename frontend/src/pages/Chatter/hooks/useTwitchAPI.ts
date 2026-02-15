@@ -1,22 +1,10 @@
-import { useCallback, useEffect, useMemo } from "react";
-import { useTwitchCtx } from "../context/twitchctx.tsx";
-import { createTwitchAPI } from "../lib/twitch_api/twitch_api.ts";
-import { Stream, UserInfo } from "../lib/twitch_api/twitch_api_types.ts";
+import { useCallback } from "react";
+import { Stream, UserInfo } from "@/lib/twitch_api/twitch_api_types.ts";
 import { useAsync } from "./useAsync.ts";
+import { useChatterCtx } from "@Chatter/context/chatterctx.tsx";
 
 export function useTwitchAPI() {
-  const {
-    oauth: { token },
-    clientID,
-    twitchAPI,
-    _setTwitchAPI,
-  } = useTwitchCtx();
-
-  useEffect(() => {
-    if (!twitchAPI && clientID && token) {
-      createTwitchAPI(clientID, token).then((api) => _setTwitchAPI(api));
-    }
-  }, [clientID, token, _setTwitchAPI, twitchAPI]);
+  const { twitchAPI } = useChatterCtx();
 
   const _getStreams = useCallback(
     async (names: string[] | string): Promise<Stream[]> => {

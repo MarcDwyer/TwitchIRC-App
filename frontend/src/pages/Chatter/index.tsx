@@ -1,33 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { Navbar } from "../../components/Navbar.tsx";
-import { StreamSidebar } from "../../components/StreamSidebar";
-import { Stream } from "../../lib/twitch_api/twitch_api_types.ts";
-import { TwitchViewer } from "../../components/TwitchViewer/TwitchViewer.tsx";
-import { useTwitchIRC } from "../../hooks/useTwitchIRC.ts";
-import { BroadcastModal } from "../../components/BroadcastModal.tsx";
-import { useUserInfo } from "../../hooks/useUserInfo.ts";
+import { useEffect, useState } from "react";
+import { Navbar } from "./components/Navbar.tsx";
+import { StreamSidebar } from "./components/StreamSidebar/index.tsx";
+import { TwitchViewer } from "./components/TwitchViewer/index.tsx";
+import { BroadcastModal } from "./components/BroadcastModal.tsx";
+import { useUserInfo } from "./hooks/useUserInfo.ts";
+import { useViewing } from "./context/chatterctx.tsx";
 
-export type BroadcastHandler = (msg: string) => void;
-
-export function Dashboard() {
-  const [viewing, setViewing] = useState<Map<string, Stream>>(new Map());
+export function Chatter() {
   const [broadcastOpen, setBroadcastOpen] = useState(false);
-  const { ws } = useTwitchIRC();
   const userInfo = useUserInfo();
-
-  const broadcastHandlers = useRef<BroadcastHandler[]>([]);
-
-  const broadcast = (msg: string) => {
-    if (!userInfo || !ws) return;
-    broadcastHandlers.current.forEach((push) => push(msg));
-  };
-
-  const part = (stream: Stream, channel: string) => {
-    const updated = new Map(viewing);
-    updated.delete(stream.user_name);
-    setViewing(updated);
-    ws?.send(`PART ${channel}`);
-  };
+  const { viewing } = useViewing();
 
   useEffect(() => {
     if (userInfo) {
@@ -57,11 +39,6 @@ export function Dashboard() {
       </Navbar>
       <div className="flex flex-nowrap flex-1 min-h-0 w-full">
         <StreamSidebar
-          onClick={(stream) => {
-            if (!viewing.has(stream.user_name)) {
-              setViewing(new Map(viewing).set(stream.user_name, stream));
-            }
-          }}
           onBroadcastAll={() => setBroadcastOpen(true)}
           onJoinAll={() => {}}
         />
@@ -97,13 +74,7 @@ export function Dashboard() {
                 }`}
               >
                 {Array.from(viewing.values()).map((stream) => (
-                  <TwitchViewer
-                    key={stream.id}
-                    stream={stream}
-                    ws={ws}
-                    broadcastHandlers={broadcastHandlers}
-                    part={part}
-                  />
+                  <TwitchViewer key={stream.id} stream={stream} />
                 ))}
               </div>
             )}
@@ -112,10 +83,8 @@ export function Dashboard() {
       <BroadcastModal
         open={broadcastOpen}
         onClose={() => setBroadcastOpen(false)}
-        onSend={broadcast}
+        onSend={() => {}}
       />
     </div>
   );
 }
-
-export default Dashboard;

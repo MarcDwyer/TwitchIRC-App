@@ -1,5 +1,5 @@
-import { Commands, IrcMessage } from "../types/twitch_data.ts";
-import { createBadgeObj } from "./parcer_util.ts";
+import { Commands, IrcMessage } from "@/types/twitch_data.ts";
+import { createBadgeObj } from "@/util/parcer_util.ts";
 
 export function createIRCMessage(
   message: string,
