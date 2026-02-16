@@ -122,6 +122,39 @@ export class TwitchAPI {
     return data.data as UserInfo[];
   }
 
+  async getTopStreams(
+    first: number = 20,
+    after?: string,
+  ): Promise<{ data: Stream[]; cursor?: string }> {
+    const params = new URLSearchParams({ first: first.toString() });
+    if (after) params.append("after", after);
+
+    const response = await fetch(
+      `${baseUrl}/streams?${params.toString()}`,
+      {
+        headers: {
+          "Client-ID": this.clientId,
+          Authorization: `Bearer ${this.oauthToken}`,
+        },
+      },
+    );
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        `Failed to fetch top streams: ${response.status} ${JSON.stringify(error)}`,
+      );
+    }
+
+    const json = await response.json();
+    return {
+      data: (json.data as Stream[]).sort(
+        (a, b) => b.viewer_count - a.viewer_count,
+      ),
+      cursor: json.pagination?.cursor,
+    };
+  }
+
   async getStreamByLogin(login: string | string[]): Promise<Stream[]> {
     const logins = Array.isArray(login) ? login : [login];
     const params = new URLSearchParams();

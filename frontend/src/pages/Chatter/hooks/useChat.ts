@@ -5,6 +5,7 @@ import { delay } from "@Chatter/util/delay.ts";
 import { createIRCMessage } from "@Chatter/util/createIRCMessage.ts";
 import { IrcMessage } from "@/types/twitch_data.ts";
 import { useChatterCtx } from "@Chatter/context/chatterctx.tsx";
+import { useTwitchReady } from "../../../hooks/useTwitchReady.ts";
 
 const addUserState = (msg: IrcMessage, userState: IrcMessage | null) => {
   if (!userState) return msg;
@@ -15,16 +16,13 @@ const isOlderThanMins = (timestamp: number, mins: number) =>
   Date.now() - timestamp > mins * 60 * 1000;
 
 type NewMessagesCB = (msgs: IrcMessage[]) => void;
-export function useChat(
-  channel: string,
-  newMsgsCB?: NewMessagesCB,
-) {
+export function useChat(channel: string, newMsgsCB?: NewMessagesCB) {
   const { ws } = useChatterCtx();
   const [chatters, setChatters] = useState<Map<string, number>>(new Map());
   const [messages, setMessages] = useState<IrcMessage[]>([]);
   const [joined, setJoined] = useState<boolean>(false);
 
-  const userInfo = useUserInfo();
+  const userInfo = useTwitchReady().twitchAPI.userInfo;
 
   const buffer = useRef<IrcMessage[]>([]);
   const batching = useRef<boolean>(false);
@@ -133,7 +131,6 @@ export function useChat(
           updated.delete(username);
         }
       }
-      console.log({ removed, prevChatters });
       return updated;
     };
 

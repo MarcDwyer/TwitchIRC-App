@@ -2,8 +2,8 @@ import { useState } from "react";
 import { PinnedChannelModal } from "./PinnedChannelModal.tsx";
 import { FollowerChannels } from "./FollowerChannels.tsx";
 import { PinnedChannels } from "./PinnedChannels.tsx";
-import { usePinned } from "@Chatter/hooks/usePinned.ts";
 import type { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
+import { usePinnedCtx } from "../../context/pinnedctx.tsx";
 
 type Props = {
   onBroadcastAll?: () => void;
@@ -14,7 +14,7 @@ export function StreamSidebar({ onBroadcastAll, onChannelClick }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [pinnedModalOpen, setPinnedModalOpen] = useState(false);
 
-  const { addPinned, pinned, removePinned, checkPinnedLive } = usePinned();
+  const { addPinned, pinned, removePinned, checkPinnedLive } = usePinnedCtx();
 
   return (
     <aside

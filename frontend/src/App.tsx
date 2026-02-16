@@ -1,13 +1,17 @@
-import { Chatter } from "./pages/Chatter/index.tsx";
 import { useTwitchCtx } from "./context/twitchctx.tsx";
 import { ClientIDPage } from "./pages/ClientID.tsx";
 import { OAuthPage } from "./pages/OAuth.tsx";
 import { ChatterCtxProvider } from "./pages/Chatter/context/chatterctx.tsx";
 import { useEffect, useState } from "react";
-import { createTwitchAPI, TwitchAPI } from "./lib/twitch_api/twitch_api.ts";
+import { createTwitchAPI } from "./lib/twitch_api/twitch_api.ts";
+import { Navbar } from "./components/Navbar.tsx";
+import { PinnedProvider } from "@/context/pinnedctx.tsx";
+import { TabHandler } from "./components/TabHandler.tsx";
 
+export type Tab = "chatter" | "discovery";
 function App() {
   const twitch = useTwitchCtx();
+  const [tab, setTab] = useState<Tab>("chatter");
 
   useEffect(() => {
     if (
@@ -43,11 +47,17 @@ function App() {
       </div>
     );
   }
-
   return (
-    <ChatterCtxProvider>
-      <Chatter />
-    </ChatterCtxProvider>
+    <div className="flex flex-col h-screen overflow-hidden">
+      <Navbar tab={tab} onTabChange={setTab} />
+      <div className="flex flex-nowrap flex-1 min-h-0 w-full">
+        <PinnedProvider>
+          <ChatterCtxProvider>
+            <TabHandler tab={tab} />
+          </ChatterCtxProvider>
+        </PinnedProvider>
+      </div>
+    </div>
   );
 }
 
