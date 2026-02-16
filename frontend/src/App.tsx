@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { createTwitchAPI, TwitchAPI } from "./lib/twitch_api/twitch_api.ts";
 
 function App() {
-  const [twitchAPI, setTwitchAPI] = useState<null | TwitchAPI>(null);
   const twitch = useTwitchCtx();
 
   useEffect(() => {
@@ -15,11 +14,13 @@ function App() {
       twitch.clientID &&
       twitch.oauth.validated &&
       twitch.oauth.token &&
-      !twitchAPI
+      !twitch.twitchAPI
     ) {
-      createTwitchAPI(twitch.clientID, twitch.oauth.token).then(setTwitchAPI);
+      createTwitchAPI(twitch.clientID, twitch.oauth.token).then(
+        twitch.setTwitchAPI,
+      );
     }
-  }, [twitch, twitchAPI]);
+  }, [twitch]);
 
   if (!twitch.clientID) {
     return <ClientIDPage />;
@@ -28,7 +29,7 @@ function App() {
     return <OAuthPage />;
   }
 
-  if (!twitchAPI) {
+  if (!twitch.twitchAPI) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-zinc-900 gap-4">
         <div className="flex gap-1.5">
@@ -44,11 +45,7 @@ function App() {
   }
 
   return (
-    <ChatterCtxProvider
-      twitchAPI={twitchAPI}
-      token={twitch.oauth.token as string}
-      clientID={twitch.clientID}
-    >
+    <ChatterCtxProvider>
       <Chatter />
     </ChatterCtxProvider>
   );

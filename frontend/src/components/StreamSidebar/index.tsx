@@ -2,17 +2,17 @@ import { useState } from "react";
 import { PinnedChannelModal } from "./PinnedChannelModal.tsx";
 import { FollowerChannels } from "./FollowerChannels.tsx";
 import { PinnedChannels } from "./PinnedChannels.tsx";
-import { useViewing } from "@Chatter/context/chatterctx.tsx";
-import { usePinned } from "../../hooks/usePinned.ts";
+import { usePinned } from "@Chatter/hooks/usePinned.ts";
+import type { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
 
 type Props = {
   onBroadcastAll?: () => void;
+  onChannelClick?: (stream: Stream) => void;
 };
 
-export function StreamSidebar({ onBroadcastAll }: Props) {
+export function StreamSidebar({ onBroadcastAll, onChannelClick }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [pinnedModalOpen, setPinnedModalOpen] = useState(false);
-  const { addViewing } = useViewing();
 
   const { addPinned, pinned, removePinned, checkPinnedLive } = usePinned();
 
@@ -59,7 +59,7 @@ export function StreamSidebar({ onBroadcastAll }: Props) {
           collapsed ? "flex flex-col items-center py-2 gap-2" : ""
         }`}
       >
-        <FollowerChannels collapsed={collapsed} onClick={addViewing} />
+        <FollowerChannels collapsed={collapsed} onClick={onChannelClick} />
         <PinnedChannels
           pinned={pinned}
           removePinned={removePinned}
@@ -68,11 +68,9 @@ export function StreamSidebar({ onBroadcastAll }: Props) {
         />
       </div>
 
-      {collapsed
-        ? (
-          <div className="border-t border-zinc-700 flex flex-col items-center py-2 gap-2">
-            {
-              /*<button
+      {collapsed ? (
+        <div className="border-t border-zinc-700 flex flex-col items-center py-2 gap-2">
+          {/*<button
               type="button"
               onClick={onBroadcastAll}
               className="w-8 h-8 rounded-full bg-red-600 hover:bg-red-700 text-white flex items-center justify-center transition-colors cursor-pointer"
@@ -91,13 +89,35 @@ export function StreamSidebar({ onBroadcastAll }: Props) {
                 <path d="M22 2 11 13" />
                 <path d="M22 2 15 22 11 13 2 9z" />
               </svg>
-            </button>*/
-            }
+            </button>*/}
+          <button
+            type="button"
+            onClick={() => setPinnedModalOpen(true)}
+            className="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-colors cursor-pointer"
+            title="Pin Channel"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-4 h-4"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+        </div>
+      ) : (
+        <div className="border-t border-zinc-700">
+          <div className="px-4 py-3">
             <button
               type="button"
               onClick={() => setPinnedModalOpen(true)}
-              className="w-8 h-8 rounded-full bg-purple-600 hover:bg-purple-700 text-white flex items-center justify-center transition-colors cursor-pointer"
-              title="Pin Channel"
+              className="w-full flex items-center justify-center gap-1.5 text-purple-400 hover:text-purple-300 text-sm font-medium py-2 rounded transition-colors cursor-pointer"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -112,35 +132,10 @@ export function StreamSidebar({ onBroadcastAll }: Props) {
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
+              Pin Channel
             </button>
           </div>
-        )
-        : (
-          <div className="border-t border-zinc-700">
-            <div className="px-4 py-3">
-              <button
-                type="button"
-                onClick={() => setPinnedModalOpen(true)}
-                className="w-full flex items-center justify-center gap-1.5 text-purple-400 hover:text-purple-300 text-sm font-medium py-2 rounded transition-colors cursor-pointer"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                Pin Channel
-              </button>
-            </div>
-            {
-              /*<div className="px-4 py-3 border-t border-zinc-700">
+          {/*<div className="px-4 py-3 border-t border-zinc-700">
               <button
                 type="button"
                 onClick={onBroadcastAll}
@@ -148,10 +143,9 @@ export function StreamSidebar({ onBroadcastAll }: Props) {
               >
                 Broadcast All
               </button>
-            </div>*/
-            }
-          </div>
-        )}
+            </div>*/}
+        </div>
+      )}
 
       <PinnedChannelModal
         open={pinnedModalOpen}

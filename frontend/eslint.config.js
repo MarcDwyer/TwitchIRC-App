@@ -10,6 +10,7 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react-hooks/preserve-manual-memoization": "off",
       "react-hooks/exhaustive-deps": "off",
+      "@typescript-eslint/ban-ts-comment": "off",
     },
   },
 );

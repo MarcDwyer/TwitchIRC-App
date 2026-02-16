@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { handleMessage } from "../util/handleMessage.ts";
-import { TwitchAPI } from "../lib/twitch_api/twitch_api.ts";
+import { useTwitchReady } from "./useTwitchReady.ts";
 
 export type IRCConnectionState = "disconnected" | "pending" | "authenticated";
 
-export function useTwitchIRC(twitchAPI: TwitchAPI, token: string) {
+export function useTwitchIRC() {
+  const { twitchAPI, token } = useTwitchReady();
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [status, setStatus] = useState<IRCConnectionState>("disconnected");
 
@@ -29,16 +30,14 @@ export function useTwitchIRC(twitchAPI: TwitchAPI, token: string) {
     if (!ws) {
       return;
     }
-    ws.addEventListener(
-      "message",
-      ({ data }: MessageEvent<string>) =>
-        handleMessage({
-          data,
-          cbs: {
-            "001": () => setStatus("authenticated"),
-            PING: () => ws.send("PONG :tmi.twitch.tv"),
-          },
-        }),
+    ws.addEventListener("message", ({ data }: MessageEvent<string>) =>
+      handleMessage({
+        data,
+        cbs: {
+          "001": () => setStatus("authenticated"),
+          PING: () => ws.send("PONG :tmi.twitch.tv"),
+        },
+      }),
     );
     ws.addEventListener("error", (err) => {
       console.error("WebSocket error:", err);

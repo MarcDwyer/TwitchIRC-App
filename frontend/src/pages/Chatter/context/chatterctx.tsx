@@ -7,16 +7,12 @@ import {
 } from "react";
 import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
 import { useTwitchIRC } from "@/hooks/useTwitchIRC.ts";
-import { TwitchAPI } from "@/lib/twitch_api/twitch_api.ts";
 
 type ChatterCtxType = {
   broadcastHandlers: React.RefObject<BroadcastHandler[]>;
   ws: WebSocket | null;
   viewing: Map<string, Stream>;
   _setViewing: React.Dispatch<React.SetStateAction<Map<string, Stream>>>;
-  twitchAPI: TwitchAPI;
-  token: string;
-  clientID: string;
 };
 export type BroadcastHandler = (msg: string) => void;
 
@@ -25,17 +21,12 @@ const ChatterCtx = createContext<ChatterCtxType>();
 
 export const ChatterCtxProvider = ({
   children,
-  twitchAPI,
-  clientID,
-  token,
 }: {
   children: React.ReactNode;
-  twitchAPI: TwitchAPI;
-  token: string;
-  clientID: string;
 }) => {
   const [viewing, _setViewing] = useState<Map<string, Stream>>(new Map());
-  const ws = useTwitchIRC(twitchAPI, token);
+
+  const ws = useTwitchIRC();
   const broadcastHandlers = useRef<BroadcastHandler[]>([]);
   return (
     <ChatterCtx.Provider
@@ -44,9 +35,6 @@ export const ChatterCtxProvider = ({
         viewing,
         _setViewing,
         ws,
-        twitchAPI,
-        token,
-        clientID,
       }}
     >
       {children}
@@ -77,7 +65,7 @@ export const useViewing = () => {
   const addViewing = useCallback(
     (stream: Stream) =>
       _setViewing((prevViewing) =>
-        new Map(prevViewing).set(stream.user_login, stream)
+        new Map(prevViewing).set(stream.user_login, stream),
       ),
     [_setViewing],
   );

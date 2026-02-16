@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Stream, UserInfo } from "@/lib/twitch_api/twitch_api_types.ts";
-import { useTwitchAPI } from "./useTwitchAPI.ts";
+import { useTwitchAPI } from "@/hooks/useTwitchAPI.ts";
 import { TwitchAPI } from "../../../lib/twitch_api/twitch_api.ts";
 import {
   createMapFromStream,

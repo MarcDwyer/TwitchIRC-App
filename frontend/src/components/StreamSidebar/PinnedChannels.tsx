@@ -1,11 +1,12 @@
 import { Stream, UserInfo } from "@/lib/twitch_api/twitch_api_types.ts";
 
-function Collapsed(
-  { pinned, checkPinnedLive }: {
-    pinned: Map<string, UserInfo>;
-    checkPinnedLive: (login: string) => Stream | undefined;
-  },
-) {
+function Collapsed({
+  pinned,
+  checkPinnedLive,
+}: {
+  pinned: Map<string, UserInfo>;
+  checkPinnedLive: (login: string) => Stream | undefined;
+}) {
   return (
     <>
       {Array.from(pinned.values()).map((user) => {
@@ -33,13 +34,15 @@ function Collapsed(
   );
 }
 
-function Uncollapsed(
-  { pinned, removePinned, checkPinnedLive }: {
-    pinned: Map<string, UserInfo>;
-    removePinned: (login: string) => void;
-    checkPinnedLive: (login: string) => Stream | undefined;
-  },
-) {
+function Uncollapsed({
+  pinned,
+  removePinned,
+  checkPinnedLive,
+}: {
+  pinned: Map<string, UserInfo>;
+  removePinned: (login: string) => void;
+  checkPinnedLive: (login: string) => Stream | undefined;
+}) {
   return (
     <>
       <div className="py-3 px-2 border-t border-zinc-700">
@@ -123,15 +126,17 @@ type Props = {
   checkPinnedLive: (login: string) => Stream | undefined;
 };
 
-export function PinnedChannels(
-  { collapsed, pinned, checkPinnedLive, removePinned }: Props,
-) {
+export function PinnedChannels({
+  collapsed,
+  pinned,
+  checkPinnedLive,
+  removePinned,
+}: Props) {
   if (pinned.size === 0) return null;
 
   if (collapsed) {
     return <Collapsed pinned={pinned} checkPinnedLive={checkPinnedLive} />;
   }
-  console.log({ pinned });
   return (
     <Uncollapsed
       pinned={pinned}

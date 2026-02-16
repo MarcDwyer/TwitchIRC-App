@@ -1,10 +1,10 @@
 import { useCallback } from "react";
 import { Stream, UserInfo } from "@/lib/twitch_api/twitch_api_types.ts";
 import { useAsync } from "./useAsync.ts";
-import { useChatterCtx } from "@Chatter/context/chatterctx.tsx";
+import { useTwitchReady } from "./useTwitchReady.ts";
 
 export function useTwitchAPI() {
-  const { twitchAPI } = useChatterCtx();
+  const { twitchAPI } = useTwitchReady();
 
   const _getStreams = useCallback(
     async (names: string[] | string): Promise<Stream[]> => {

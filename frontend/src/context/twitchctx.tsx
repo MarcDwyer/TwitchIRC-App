@@ -6,6 +6,7 @@ import {
   useContext,
   useState,
 } from "react";
+import { TwitchAPI } from "../lib/twitch_api/twitch_api.ts";
 
 export type OAuth = {
   token: string | null;
@@ -18,30 +19,21 @@ export type TwitchContextType = {
   _setOAuth: Dispatch<SetStateAction<OAuth>>;
   clientID: string | null;
   _setClientID: Dispatch<SetStateAction<string | null>>;
+  twitchAPI: null | TwitchAPI;
+  setTwitchAPI: Dispatch<SetStateAction<TwitchAPI | null>>;
 };
 const InitialOAuth = {
   token: null,
   validated: false,
   error: null,
 };
-const InitialTwitchState: TwitchContextType = {
-  clientID: null,
-  oauth: InitialOAuth,
-  _setClientID: () => {},
-  _setOAuth: () => {},
-};
+//@ts-ignore
+export const TwitchContext = createContext<TwitchContextType>();
 
-export const TwitchContext = createContext<TwitchContextType>(
-  InitialTwitchState,
-);
-
-export const TwitchProvider = ({
-  children,
-}: {
-  children: ReactNode;
-}) => {
+export const TwitchProvider = ({ children }: { children: ReactNode }) => {
   const [clientID, _setClientID] = useState<string | null>(null);
   const [oauth, _setOAuth] = useState<OAuth>(InitialOAuth);
+  const [twitchAPI, setTwitchAPI] = useState<TwitchAPI | null>(null);
 
   return (
     <TwitchContext.Provider
@@ -50,6 +42,8 @@ export const TwitchProvider = ({
         _setClientID,
         oauth,
         _setOAuth,
+        twitchAPI,
+        setTwitchAPI,
       }}
     >
       {children}

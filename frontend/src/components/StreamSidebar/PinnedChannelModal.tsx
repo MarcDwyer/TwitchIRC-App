@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useTwitchAPI } from "@Chatter/hooks/useTwitchAPI.ts";
+import { useTwitchAPI } from "@/hooks/useTwitchAPI.ts";
 import { UserInfo } from "@/lib/twitch_api/twitch_api_types.ts";
 
 type Props = {

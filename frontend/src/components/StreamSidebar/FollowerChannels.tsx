@@ -1,4 +1,4 @@
-import { useFollowing } from "@Chatter/hooks/useFollowing.ts";
+import { useFollowing } from "@/hooks/useFollowing.ts";
 import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
 
 type Props = {
