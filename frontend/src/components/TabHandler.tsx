@@ -14,9 +14,7 @@ export function TabHandler({ tab }: Props) {
 
   const onStreamClick = (stream: Stream) => {
     if (tab === "chatter") {
-      //shit
       addViewing(stream);
-    } else {
       // also shit
     }
   };

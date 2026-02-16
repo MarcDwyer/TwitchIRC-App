@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "frontend": "cd frontend && bun run dev",
+    "backend": "bun run backend/server.ts"
+  }
+}

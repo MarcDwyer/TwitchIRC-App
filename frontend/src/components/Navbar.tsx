@@ -1,10 +1,10 @@
-import { Tabs } from "@/App.tsx";
+import { Tab } from "@/App.tsx";
 import { LogoutBtn } from "./LogoutBtn.tsx";
 import { useTwitchReady } from "@/hooks/useTwitchReady.ts";
 
 type Props = {
-  tab: Tabs;
-  onTabChange: (tab: Tabs) => void;
+  tab: Tab;
+  onTabChange: (tab: Tab) => void;
 };
 
 export function Navbar({ tab, onTabChange }: Props) {

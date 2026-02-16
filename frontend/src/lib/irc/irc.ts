@@ -1,5 +1,3 @@
-#!/usr/bin/env -S deno run --allow-net
-
 import { Channel } from "./channel.ts";
 
 type IRCEventType = "authenticated" | "onjoin";
