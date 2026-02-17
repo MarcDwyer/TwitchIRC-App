@@ -53,7 +53,7 @@ function App() {
       <div className="flex flex-nowrap flex-1 min-h-0 w-full">
         <PinnedProvider>
           <ChatterCtxProvider>
-            <TabHandler tab={tab} />
+            <TabHandler tab={tab} setTab={setTab} />
           </ChatterCtxProvider>
         </PinnedProvider>
       </div>

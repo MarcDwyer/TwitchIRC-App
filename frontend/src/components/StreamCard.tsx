@@ -8,16 +8,23 @@ function formatViewerCount(count: number): string {
 
 type Props = {
   stream: Stream;
+  onClick: (stream: Stream) => void;
+  isPinned: boolean;
 };
-export function StreamCard({ stream }: Props) {
+export function StreamCard({ stream, onClick, isPinned }: Props) {
   const thumbnail = stream.thumbnail_url
     .replace("{width}", "440")
     .replace("{height}", "248");
 
   return (
     <div
+      onClick={() => onClick(stream)}
       key={stream.id}
-      className="flex flex-col rounded-lg overflow-hidden border border-zinc-700 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/5 transition-all cursor-pointer group"
+      className={`flex flex-col rounded-lg overflow-hidden border transition-all cursor-pointer group ${
+        isPinned
+          ? "border-purple-500 shadow-[0_0_12px_rgba(168,85,247,0.4)]"
+          : "border-zinc-700 hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/5"
+      }`}
     >
       <div className="relative">
         <img

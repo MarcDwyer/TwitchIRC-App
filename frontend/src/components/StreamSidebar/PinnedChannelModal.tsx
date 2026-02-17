@@ -1,18 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useTwitchAPI } from "@/hooks/useTwitchAPI.ts";
-import { UserInfo } from "@/lib/twitch_api/twitch_api_types.ts";
+import { usePinnedCtx } from "../../context/pinnedctx.tsx";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  addPinned: (user: UserInfo) => void;
 };
 
-export function PinnedChannelModal({ open, onClose, addPinned }: Props) {
+export function PinnedChannelModal({ open, onClose }: Props) {
   const [channel, setChannel] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
-
+  const { addPinnedFromUser } = usePinnedCtx();
   const { users } = useTwitchAPI();
 
   useEffect(() => {
@@ -33,7 +32,7 @@ export function PinnedChannelModal({ open, onClose, addPinned }: Props) {
       setError(null);
       const data = await users.execute(channel);
       if (!data.length) throw "No user exists";
-      addPinned(data[0]);
+      addPinnedFromUser(data[0]);
       onClose();
     } catch (err) {
       if (typeof err === "string") {

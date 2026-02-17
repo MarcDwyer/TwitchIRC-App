@@ -1,31 +1,26 @@
-import {
-  createContext,
-  ReactNode,
-  useContext,
-} from "react";
+import { createContext, ReactNode, useContext } from "react";
 import { usePinned } from "@Chatter/hooks/usePinned.ts";
-import { Stream, UserInfo } from "@/lib/twitch_api/twitch_api_types.ts";
 
-type PinnedContextType = {
-  pinned: Map<string, UserInfo>;
-  addPinned: (user: UserInfo) => void;
-  removePinned: (login: string) => void;
-  checkPinnedLive: (login: string) => Stream | undefined;
-};
+type PinnedContextType = ReturnType<typeof usePinned>;
 
 //@ts-ignore
 const PinnedContext = createContext<PinnedContextType>();
 
 export const PinnedProvider = ({ children }: { children: ReactNode }) => {
-  const { pinned, addPinned, removePinned, checkPinnedLive } = usePinned();
+  const {
+    pinned,
+    addPinnedFromUser,
+    addPinnedFromStream,
+    removePinned,
+  } = usePinned();
 
   return (
     <PinnedContext.Provider
       value={{
         pinned,
-        addPinned,
+        addPinnedFromUser,
+        addPinnedFromStream,
         removePinned,
-        checkPinnedLive,
       }}
     >
       {children}

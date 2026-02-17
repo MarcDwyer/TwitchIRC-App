@@ -2,9 +2,11 @@ import { StreamCard } from "@/components/StreamCard.tsx";
 import { useTopStreams } from "../hooks/useTopStreams.ts";
 import { useEffect } from "react";
 import { TopStreamsSkeleton } from "./TopStreamsSkeleton.tsx";
+import { usePinnedCtx } from "../../../context/pinnedctx.tsx";
 
 export function TopStreams() {
   const { streams, fetchNextPage } = useTopStreams(20);
+  const { addPinnedFromStream, pinned, removePinned } = usePinnedCtx();
 
   useEffect(() => {
     if (!streams) fetchNextPage();
@@ -16,12 +18,23 @@ export function TopStreams() {
   return (
     <div className="flex flex-col gap-4 bg-zinc-800 rounded-lg p-4">
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
-        {streams.map((stream, i) => (
-          <StreamCard
-            stream={stream}
-            key={i}
-          />
-        ))}
+        {streams.map((stream, i) => {
+          const isPinned = pinned.has(stream.user_login);
+          return (
+            <StreamCard
+              stream={stream}
+              key={i}
+              isPinned={isPinned}
+              onClick={(str) => {
+                if (isPinned) {
+                  removePinned(str.user_login);
+                } else {
+                  addPinnedFromStream(str);
+                }
+              }}
+            />
+          );
+        })}
       </div>
       <button
         onClick={fetchNextPage}

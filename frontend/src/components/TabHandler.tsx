@@ -7,16 +7,17 @@ import { useViewing } from "@Chatter/context/chatterctx.tsx";
 
 type Props = {
   tab: Tab;
+  setTab: React.Dispatch<React.SetStateAction<Tab>>;
 };
 
-export function TabHandler({ tab }: Props) {
+export function TabHandler({ tab, setTab }: Props) {
   const { addViewing } = useViewing();
 
   const onStreamClick = (stream: Stream) => {
-    if (tab === "chatter") {
-      addViewing(stream);
-      // also shit
+    if (tab !== "chatter") {
+      setTab("chatter");
     }
+    addViewing(stream);
   };
   return (
     <>

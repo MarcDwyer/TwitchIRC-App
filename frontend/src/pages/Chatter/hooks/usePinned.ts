@@ -2,14 +2,46 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Stream, UserInfo } from "@/lib/twitch_api/twitch_api_types.ts";
 import { useTwitchAPI } from "@/hooks/useTwitchAPI.ts";
 import { TwitchAPI } from "../../../lib/twitch_api/twitch_api.ts";
-import {
-  createMapFromStream,
-  createMapFromUsers,
-} from "../util/chatter_maps.ts";
 
 const PINNED_KEY = "pinned_key";
 
-function setPinnedInLS(pinned: Map<string, UserInfo>) {
+type PinnedChannel = {
+  userInfo: UserInfo;
+  streamInfo: Stream | null;
+};
+
+export type PinnedChannelMap = Map<string, PinnedChannel>;
+
+function createPinnedChanMap(users: UserInfo[], streams: Stream[]) {
+  const map: PinnedChannelMap = new Map();
+
+  for (const user of users) {
+    const pinnedChannel: PinnedChannel = {
+      userInfo: user,
+      streamInfo: streams.find((stream) => stream.user_login === user.login) ??
+        null,
+    };
+    map.set(user.login, pinnedChannel);
+  }
+  return map;
+}
+
+function updatedPinnedStreams(
+  map: Map<string, PinnedChannel>,
+  streams: Stream[],
+) {
+  const updated: PinnedChannelMap = new Map(map);
+
+  for (const stream of streams) {
+    const pinnedChan = updated.get(stream.user_login);
+    if (pinnedChan) {
+      pinnedChan.streamInfo = stream;
+    }
+  }
+  return updated;
+}
+
+function setPinnedInLS(pinned: PinnedChannelMap) {
   const users = Array.from(pinned.keys());
   localStorage.setItem(PINNED_KEY, JSON.stringify(users));
 }
@@ -21,58 +53,62 @@ const getStreamsOfUsers = async (users: UserInfo[], twitchAPI: TwitchAPI) => {
 
 export function usePinned() {
   const { twitchAPI } = useTwitchAPI();
-  const [pinned, setPinned] = useState<Map<string, UserInfo>>(new Map());
-  const [livePinned, setLivePinned] = useState<Map<string, Stream>>(new Map());
+  const [pinned, setPinned] = useState<PinnedChannelMap>(new Map());
+  // const [livePinned, setLivePinned] = useState<Map<string, Stream>>(new Map());
 
-  const pinnedRef = useRef<Map<string, UserInfo>>(new Map());
+  const pinnedRef = useRef<Map<string, PinnedChannel>>(new Map());
 
-  const addPinned = (user: UserInfo) => {
-    const updatedPinned = new Map(pinned).set(user.login, user);
-    console.log({ user, pinned, updatedPinned });
+  const addPinnedFromStream = async (stream: Stream) => {
+    const usersInfo = await twitchAPI.getUserByLogin(stream.user_login);
+    if (!usersInfo.length) return;
+    const pinnedChannel: PinnedChannel = {
+      userInfo: usersInfo[0],
+      streamInfo: stream,
+    };
+    const updatedPinnned = new Map(pinned).set(
+      stream.user_login,
+      pinnedChannel,
+    );
+    setPinned(updatedPinnned);
+    setPinnedInLS(updatedPinnned);
+  };
 
-    setPinned(updatedPinned);
-    setPinnedInLS(updatedPinned);
+  const addPinnedFromUser = (user: UserInfo) => {
+    const pinnedChannel: PinnedChannel = {
+      userInfo: user,
+      streamInfo: null,
+    };
+    const updatedPinnned = new Map(pinned).set(user.login, pinnedChannel);
+    setPinned(updatedPinnned);
+    setPinnedInLS(updatedPinnned);
 
-    getStreamsOfUsers([user], twitchAPI).then((streamData) => {
-      if (streamData.length) {
-        const stream = streamData[0];
-        const updatedLivePinned = new Map(livePinned).set(
-          stream.user_name,
-          stream,
-        );
-        setLivePinned(updatedLivePinned);
-      }
+    twitchAPI.getStreamByLogin(user.login).then((streams) => {
+      if (!streams.length) return;
+      const stream = streams[0];
+      const updatedPin: PinnedChannel = {
+        ...pinnedChannel,
+        streamInfo: stream,
+      };
+      setPinned(new Map(pinned).set(stream.user_login, updatedPin));
     });
   };
 
   const removePinned = (login: string) => {
-    setPinned((prevPinned) => {
-      const updated = new Map(prevPinned);
-      updated.delete(login);
-      setPinnedInLS(updated);
-      return updated;
-    });
-    setLivePinned((prevLivePinned) => {
-      const updated = new Map(prevLivePinned);
-      updated.delete(login);
-      return updated;
-    });
+    const updatedDel = new Map(pinned);
+    updatedDel.delete(login);
+    setPinned(updatedDel);
   };
-
-  const checkPinnedLive = useCallback(
-    (login: string) => livePinned.get(login),
-    [livePinned],
-  );
 
   const checkLSForPinned = useCallback(async () => {
     const lsPinned = localStorage.getItem(PINNED_KEY);
     if (!lsPinned) return;
     console.log("trhis rann...");
     const pinnedLogins = JSON.parse(lsPinned) as string[];
-    const userData = await twitchAPI.getUserByLogin(pinnedLogins);
-    const streamsData = await getStreamsOfUsers(userData, twitchAPI);
-    setPinned(createMapFromUsers(userData));
-    setLivePinned(createMapFromStream(streamsData));
+    const usersInfo = await twitchAPI.getUserByLogin(pinnedLogins);
+    const streamsInfo = await getStreamsOfUsers(usersInfo, twitchAPI);
+
+    const pinnedMap = createPinnedChanMap(usersInfo, streamsInfo);
+    setPinned(pinnedMap);
   }, [twitchAPI]);
 
   useEffect(() => {
@@ -87,7 +123,7 @@ export function usePinned() {
     const refreshLive = async () => {
       const userLogins = Array.from(pinnedRef.current.keys());
       const streams = await twitchAPI.getStreamByLogin(userLogins);
-      setLivePinned(createMapFromStream(streams));
+      setPinned((prevPinned) => updatedPinnedStreams(prevPinned, streams));
     };
     const timer = setInterval(refreshLive, 60000 * 3);
     return function () {
@@ -97,8 +133,8 @@ export function usePinned() {
 
   return {
     pinned,
-    addPinned,
+    addPinnedFromUser,
+    addPinnedFromStream,
     removePinned,
-    checkPinnedLive,
   };
 }
