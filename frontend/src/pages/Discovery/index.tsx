@@ -1,11 +1,9 @@
-import { usePinnedCtx } from "../../context/pinnedctx.tsx";
+import { TopStreams } from "./components/TopStreams.tsx";
 
 export function Discovery() {
-  const { pinned } = usePinnedCtx();
-  console.log({ pinned });
   return (
-    <>
-      <span>hello world</span>
-    </>
+    <div className="p-4 bg-zinc-900 overflow-y-auto w-full h-full">
+      <TopStreams />
+    </div>
   );
 }
