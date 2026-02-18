@@ -43,10 +43,6 @@ export const ChatterCtxProvider = ({
 };
 
 export const useChatterCtx = () => {
-  return useContext(ChatterCtx);
-};
-
-export const useViewing = () => {
   const { _setViewing, ws, viewing } = useContext(ChatterCtx);
 
   const part = useCallback(
@@ -69,6 +65,6 @@ export const useViewing = () => {
       ),
     [_setViewing],
   );
-  const clearViewing = () => _setViewing(new Map())
+  const clearViewing = () => _setViewing(new Map());
   return { part, addViewing, viewing, clearViewing };
 };

@@ -3,7 +3,7 @@ import { Stream } from "./lib/twitch_api/twitch_api_types.ts";
 import { StreamSidebar } from "./components/StreamSidebar/index.tsx";
 import { Chatter } from "@Chatter/index.tsx";
 import { Discovery } from "./pages/Discovery/index.tsx";
-import { useViewing } from "@Chatter/context/chatterctx.tsx";
+import { useChatterCtx } from "@/pages/Chatter/context/chatterctx.tsx";
 
 type Props = {
   appTab: AppTab;
@@ -11,7 +11,7 @@ type Props = {
 };
 
 export function TabHandler({ appTab, setAppTab }: Props) {
-  const { addViewing } = useViewing();
+  const { addViewing } = useChatterCtx();
 
   const onStreamClick = (stream: Stream) => {
     if (appTab !== "chatter") {
@@ -28,6 +28,8 @@ export function TabHandler({ appTab, setAppTab }: Props) {
             return <Chatter />;
           case "discovery":
             return <Discovery />;
+          case "watch":
+            return <span>need to work on this</span>;
           default:
             return <span>App not found</span>;
         }

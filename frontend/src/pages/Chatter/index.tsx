@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { TwitchViewer } from "./components/TwitchViewer/index.tsx";
-import { useViewing } from "./context/chatterctx.tsx";
+import { useChatterCtx } from "./context/chatterctx.tsx";
 
 export function Chatter() {
-  const { viewing, clearViewing } = useViewing();
+  const { viewing, clearViewing } = useChatterCtx();
 
   useEffect(() => {
     return function() {

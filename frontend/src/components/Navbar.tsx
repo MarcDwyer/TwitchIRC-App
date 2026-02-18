@@ -10,7 +10,7 @@ type Props = {
 export function Navbar({ appTab, setAppTab }: Props) {
   const { twitchAPI } = useTwitchReady();
   const userInfo = twitchAPI.userInfo;
-  const apps = ["Chatter", "Discover", "Watch"];
+  const apps: AppTab[] = ["watch", "chatter", "discovery"];
   return (
     <header className="flex h-14 justify-between items-center px-6 py-2 bg-zinc-800 border-b border-zinc-700">
       <h1 className="text-lg font-bold text-zinc-100">
@@ -26,9 +26,10 @@ export function Navbar({ appTab, setAppTab }: Props) {
       <nav className="flex gap-1 bg-zinc-900 rounded-lg p-1">
         {apps.map((app) => (
           <button
+            key={app}
             type="button"
-            onClick={() => setAppTab("discovery")}
-            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+            onClick={() => setAppTab(app)}
+            className={`capitalize px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer ${
               appTab === app.toLowerCase()
                 ? "bg-purple-600 text-white"
                 : "text-zinc-400 hover:text-zinc-100"
