@@ -1,6 +1,9 @@
 {
   "scripts": {
-    "frontend": "cd frontend && bun run dev",
-    "backend": "bun run backend/server.ts"
+    "frontend": "cd frontend && bunx vite",
+    "backend": "bun run backend/main.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.9"
   }
 }

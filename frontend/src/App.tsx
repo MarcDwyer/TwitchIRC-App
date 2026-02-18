@@ -6,12 +6,12 @@ import { useEffect, useState } from "react";
 import { createTwitchAPI } from "./lib/twitch_api/twitch_api.ts";
 import { Navbar } from "./components/Navbar.tsx";
 import { PinnedProvider } from "@/context/pinnedctx.tsx";
-import { TabHandler } from "./components/TabHandler.tsx";
+import { TabHandler } from "./TabHandler.tsx";
 
-export type Tab = "chatter" | "discovery";
+export type AppTab = "chatter" | "discovery" | "watch";
 function App() {
   const twitch = useTwitchCtx();
-  const [tab, setTab] = useState<Tab>("chatter");
+  const [appTab, setAppTab] = useState<AppTab>("chatter");
 
   useEffect(() => {
     if (
@@ -49,11 +49,11 @@ function App() {
   }
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <Navbar tab={tab} onTabChange={setTab} />
+      <Navbar appTab={appTab} setAppTab={setAppTab} />
       <div className="flex flex-nowrap flex-1 min-h-0 w-full">
         <PinnedProvider>
           <ChatterCtxProvider>
-            <TabHandler tab={tab} setTab={setTab} />
+            <TabHandler appTab={appTab} setAppTab={setAppTab} />
           </ChatterCtxProvider>
         </PinnedProvider>
       </div>

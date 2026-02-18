@@ -4,7 +4,6 @@ import { useAutocomplete } from "@Chatter/hooks/useAutocomplete.ts";
 import { usePause } from "@Chatter/hooks/usePause.ts";
 import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
 import { Autocomplete } from "./Autocomplete.tsx";
-import { useChatterCtx } from "@Chatter/context/chatterctx.tsx";
 
 type Props = {
   channel: string;
@@ -19,8 +18,6 @@ export function Chat({ channel }: Props) {
     text: "",
     startingIndex: 0,
   });
-
-  const { broadcastHandlers } = useChatterCtx();
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -50,17 +47,6 @@ export function Chat({ channel }: Props) {
 
   const { chatRef, paused, handleScroll, resumeChat } = usePause(messages);
 
-  useEffect(() => {
-    const funcRef = (msg: string) => {
-      send(msg);
-    };
-    broadcastHandlers.current.push(funcRef);
-    return function () {
-      const index = broadcastHandlers.current.indexOf(funcRef);
-      if (index !== -1) broadcastHandlers.current.splice(index, 1);
-    };
-  }, [send]);
-
   return (
     <div className="relative flex flex-col flex-1 min-h-0">
       <div
@@ -77,11 +63,10 @@ export function Chat({ channel }: Props) {
           return (
             <div
               key={i}
-              className={`text-sm ${
-                mentioned
-                  ? "bg-purple-500/20 border-l-2 border-purple-500 pl-2 -ml-2"
-                  : ""
-              }`}
+              className={`text-sm ${mentioned
+                ? "bg-purple-500/20 border-l-2 border-purple-500 pl-2 -ml-2"
+                : ""
+                }`}
             >
               {isSub && (
                 <span className="inline-block w-2 h-2 rounded-full bg-purple-500 mr-1 align-middle" />

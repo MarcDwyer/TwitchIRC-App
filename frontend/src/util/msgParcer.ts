@@ -1,5 +1,10 @@
-import { Commands, IrcMessage, KeyOfCommands, Tags } from "../types/twitch_data.ts";
-import { createBadgeObj, setBadges, removeBreaks } from "./parcer_util.ts";
+import {
+  Commands,
+  IrcMessage,
+  KeyOfCommands,
+  Tags,
+} from "../types/twitch_data.ts";
+import { createBadgeObj, removeBreaks, setBadges } from "./parcer_util.ts";
 
 /*
 	Copyright (c) 2013-2015, Fionn Kelleher All rights reserved.
@@ -37,7 +42,6 @@ import { createBadgeObj, setBadges, removeBreaks } from "./parcer_util.ts";
 //   channel: null | string;
 // };
 /**
- *
  * parces messages from twitch's websocket connection
  */
 

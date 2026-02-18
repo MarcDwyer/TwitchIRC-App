@@ -42,6 +42,7 @@ export type Tags = {
   turbo: string;
   "user-id": string;
   "user-type": string;
+  "msg-id": string | undefined;
 };
 
 export type Badges = {

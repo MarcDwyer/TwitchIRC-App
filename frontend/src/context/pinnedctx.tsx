@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useContext } from "react";
-import { usePinned } from "@Chatter/hooks/usePinned.ts";
+import { usePinned } from "@/hooks/usePinned.ts";
 
 type PinnedContextType = ReturnType<typeof usePinned>;
 

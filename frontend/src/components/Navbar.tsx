@@ -1,16 +1,16 @@
-import { Tab } from "@/App.tsx";
+import { AppTab } from "@/App.tsx";
 import { LogoutBtn } from "./LogoutBtn.tsx";
 import { useTwitchReady } from "@/hooks/useTwitchReady.ts";
 
 type Props = {
-  tab: Tab;
-  onTabChange: (tab: Tab) => void;
+  appTab: AppTab;
+  setAppTab: (tab: AppTab) => void;
 };
 
-export function Navbar({ tab, onTabChange }: Props) {
+export function Navbar({ appTab, setAppTab }: Props) {
   const { twitchAPI } = useTwitchReady();
   const userInfo = twitchAPI.userInfo;
-
+  const apps = ["Chatter", "Discover", "Watch"];
   return (
     <header className="flex h-14 justify-between items-center px-6 py-2 bg-zinc-800 border-b border-zinc-700">
       <h1 className="text-lg font-bold text-zinc-100">
@@ -24,28 +24,19 @@ export function Navbar({ tab, onTabChange }: Props) {
         </div>
       </h1>
       <nav className="flex gap-1 bg-zinc-900 rounded-lg p-1">
-        <button
-          type="button"
-          onClick={() => onTabChange("chatter")}
-          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer ${
-            tab === "chatter"
-              ? "bg-purple-600 text-white"
-              : "text-zinc-400 hover:text-zinc-100"
-          }`}
-        >
-          Chatter
-        </button>
-        <button
-          type="button"
-          onClick={() => onTabChange("discovery")}
-          className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer ${
-            tab === "discovery"
-              ? "bg-purple-600 text-white"
-              : "text-zinc-400 hover:text-zinc-100"
-          }`}
-        >
-          Discover
-        </button>
+        {apps.map((app) => (
+          <button
+            type="button"
+            onClick={() => setAppTab("discovery")}
+            className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors cursor-pointer ${
+              appTab === app.toLowerCase()
+                ? "bg-purple-600 text-white"
+                : "text-zinc-400 hover:text-zinc-100"
+            }`}
+          >
+            {app}
+          </button>
+        ))}
       </nav>
       <LogoutBtn />
     </header>

@@ -69,5 +69,6 @@ export const useViewing = () => {
       ),
     [_setViewing],
   );
-  return { part, addViewing, viewing };
+  const clearViewing = () => _setViewing(new Map())
+  return { part, addViewing, viewing, clearViewing };
 };

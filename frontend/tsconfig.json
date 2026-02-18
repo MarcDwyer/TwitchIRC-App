@@ -10,6 +10,7 @@
       "@/*": ["./src/*"],
       "@Chatter/*": ["./src/pages/Chatter/*"],
     },
+    "allowImportingTsExtensions": true,
     "strict": true,
     "skipLibCheck": true,
   },

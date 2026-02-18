@@ -1,9 +1,15 @@
+import { useEffect } from "react";
 import { TwitchViewer } from "./components/TwitchViewer/index.tsx";
 import { useViewing } from "./context/chatterctx.tsx";
 
 export function Chatter() {
-  const { viewing } = useViewing();
+  const { viewing, clearViewing } = useViewing();
 
+  useEffect(() => {
+    return function() {
+      clearViewing();
+    }
+  }, [])
   return (
     <>
       <main className="w-full h-full bg-zinc-800 overflow-y-scroll p-2">

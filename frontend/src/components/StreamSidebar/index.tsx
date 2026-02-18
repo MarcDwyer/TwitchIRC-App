@@ -6,23 +6,21 @@ import type { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
 
 type Props = {
   onBroadcastAll?: () => void;
-  onChannelClick: (stream: Stream) => void;
+  onStreamClick: (stream: Stream) => void;
 };
 
-export function StreamSidebar({ onBroadcastAll, onChannelClick }: Props) {
+export function StreamSidebar({ onBroadcastAll, onStreamClick }: Props) {
   const [collapsed, setCollapsed] = useState(false);
   const [pinnedModalOpen, setPinnedModalOpen] = useState(false);
 
   return (
     <aside
-      className={`h-full bg-zinc-900 border-r border-zinc-700 flex flex-col flex-shrink-0 transition-all duration-200 ${
-        collapsed ? "w-14" : "w-64"
-      }`}
+      className={`h-full bg-zinc-900 border-r border-zinc-700 flex flex-col flex-shrink-0 transition-all duration-200 ${collapsed ? "w-14" : "w-64"
+        }`}
     >
       <div
-        className={`py-3 border-b border-zinc-700 flex items-center ${
-          collapsed ? "justify-center px-1" : "justify-between px-2"
-        }`}
+        className={`py-3 border-b border-zinc-700 flex items-center ${collapsed ? "justify-center px-1" : "justify-between px-2"
+          }`}
       >
         {!collapsed && (
           <h2 className="text-xs font-semibold text-zinc-400 uppercase tracking-wider px-2">
@@ -36,9 +34,8 @@ export function StreamSidebar({ onBroadcastAll, onChannelClick }: Props) {
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className={`w-4 h-4 transition-transform duration-200 ${
-              collapsed ? "rotate-180" : ""
-            }`}
+            className={`w-4 h-4 transition-transform duration-200 ${collapsed ? "rotate-180" : ""
+              }`}
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -52,14 +49,13 @@ export function StreamSidebar({ onBroadcastAll, onChannelClick }: Props) {
       </div>
 
       <div
-        className={`flex-1 overflow-y-auto ${
-          collapsed ? "flex flex-col items-center py-2 gap-2" : ""
-        }`}
+        className={`flex-1 overflow-y-auto ${collapsed ? "flex flex-col items-center py-2 gap-2" : ""
+          }`}
       >
-        <FollowerChannels collapsed={collapsed} onClick={onChannelClick} />
+        <FollowerChannels collapsed={collapsed} onClick={onStreamClick} />
         <PinnedChannels
           collapsed={collapsed}
-          onClick={onChannelClick}
+          onClick={onStreamClick}
         />
       </div>
 

@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { handleMessage, HandleMsgCallbacks } from "@/util/handleMessage.ts";
-import { useUserInfo } from "./useUserInfo.ts";
 import { delay } from "@Chatter/util/delay.ts";
 import { createIRCMessage } from "@Chatter/util/createIRCMessage.ts";
 import { IrcMessage } from "@/types/twitch_data.ts";
@@ -92,6 +91,9 @@ export function useChat(channel: string, newMsgsCB?: NewMessagesCB) {
         JOIN: () => {
           setJoined(true);
         },
+        NOTICE: (msg) => {
+          setMessages((prev) => [...prev, msg]);
+        },
       };
       handleMessage({
         data,
@@ -101,7 +103,7 @@ export function useChat(channel: string, newMsgsCB?: NewMessagesCB) {
     };
     ws.addEventListener("message", ref);
 
-    return function () {
+    return function() {
       ws?.removeEventListener("message", ref);
     };
   }, [ws, channel, batchMsgs]);
@@ -138,7 +140,7 @@ export function useChat(channel: string, newMsgsCB?: NewMessagesCB) {
       () => setChatters(delIdleChatters),
       60000 * 10,
     );
-    return function () {
+    return function() {
       clearInterval(delIdleTimer);
     };
   }, []);
