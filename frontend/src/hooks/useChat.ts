@@ -1,66 +1,32 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { handleMessage, HandleMsgCallbacks } from "@/util/handleMessage.ts";
-import { delay } from "@Chatter/util/delay.ts";
 import { createIRCMessage } from "@Chatter/util/createIRCMessage.ts";
 import { IrcMessage } from "@/types/twitch_data.ts";
 import { useTwitchReady } from "./useTwitchReady.ts";
+import { useMessages } from "./useMessages.ts";
+import { useChatters } from "./useChatters.ts";
 
 const addUserState = (msg: IrcMessage, userState: IrcMessage | null) => {
   if (!userState) return msg;
   Object.assign(msg, { tags: userState.tags });
 };
 
-const isOlderThanMins = (timestamp: number, mins: number) =>
-  Date.now() - timestamp > mins * 60 * 1000;
-
-type NewMessagesCB = (msgs: IrcMessage[]) => void;
-export function useChat(channel: string, newMsgsCB?: NewMessagesCB) {
+export function useChat(channel: string) {
   const { ws } = useTwitchReady();
-  const [chatters, setChatters] = useState<Map<string, number>>(new Map());
-  const [messages, setMessages] = useState<IrcMessage[]>([]);
   const [joined, setJoined] = useState<boolean>(false);
 
   const userInfo = useTwitchReady().twitchAPI.userInfo;
 
-  const buffer = useRef<IrcMessage[]>([]);
-  const batching = useRef<boolean>(false);
+  const { addChatter, chatters, reset: resetChatters } = useChatters(channel);
+
+  const {
+    messages,
+    handleMessage: handlePrivMsg,
+    addMessage,
+    reset: resetMessages,
+  } = useMessages(channel);
 
   const userState = useRef<IrcMessage | null>(null);
-
-  const updateChatters = useCallback((newMsgs: IrcMessage[]) => {
-    setChatters((prevChatters) => {
-      const updatedChatters = new Map(prevChatters);
-      for (const { username } of newMsgs) {
-        updatedChatters.set(username, Date.now());
-      }
-      return updatedChatters;
-    });
-  }, []);
-
-  const batchMsgs = useCallback(async () => {
-    batching.current = true;
-
-    const batch = async () => {
-      while (buffer.current.length) {
-        const snippet = buffer.current.splice(0, 10);
-        updateChatters(snippet);
-        setMessages((prev) => {
-          const limit = 200;
-          const nextLen = prev.length + snippet.length;
-          if (nextLen >= limit) {
-            prev.splice(0, nextLen - limit);
-          }
-          const updated = [...prev, ...snippet];
-          newMsgsCB?.(updated);
-          return updated;
-        });
-
-        await delay(750);
-      }
-    };
-    await batch();
-    batching.current = false;
-  }, [newMsgsCB, updateChatters]);
 
   const send = useCallback(
     (msg: string) => {
@@ -71,7 +37,7 @@ export function useChat(channel: string, newMsgsCB?: NewMessagesCB) {
         userInfo.display_name ?? "",
       );
       addUserState(ircMsg, userState.current);
-      setMessages((prev) => [...prev, ircMsg]);
+      addMessage(ircMsg);
       ws.send(`PRIVMSG ${channel} :${msg}`);
     },
     [ws, userInfo, channel],
@@ -81,8 +47,8 @@ export function useChat(channel: string, newMsgsCB?: NewMessagesCB) {
     const ref = ({ data }: MessageEvent<string>) => {
       const cbs: HandleMsgCallbacks = {
         PRIVMSG: (msg) => {
-          buffer.current.push(msg);
-          if (!batching.current) batchMsgs();
+          addChatter(msg);
+          handlePrivMsg(msg);
         },
         USERSTATE: (ircMsg) => {
           userState.current = ircMsg;
@@ -91,7 +57,9 @@ export function useChat(channel: string, newMsgsCB?: NewMessagesCB) {
           setJoined(true);
         },
         NOTICE: (msg) => {
-          setMessages((prev) => [...prev, msg]);
+          msg.username = "NOTICE";
+          console.log({ msg });
+          addMessage(msg);
         },
       };
       handleMessage({
@@ -105,7 +73,7 @@ export function useChat(channel: string, newMsgsCB?: NewMessagesCB) {
     return function () {
       ws?.removeEventListener("message", ref);
     };
-  }, [ws, channel, batchMsgs]);
+  }, [ws, channel, handlePrivMsg]);
 
   const isMentioned = useCallback(
     (msg: IrcMessage) => {
@@ -123,34 +91,15 @@ export function useChat(channel: string, newMsgsCB?: NewMessagesCB) {
   }, [joined, ws, channel]);
 
   useEffect(() => {
-    const delIdleChatters = (prevChatters: Map<string, number>) => {
-      const updated = new Map(prevChatters);
-      const removed = [];
-      for (const [username, lastMsg] of updated.entries()) {
-        if (isOlderThanMins(lastMsg, 10)) {
-          removed.push(username);
-          updated.delete(username);
-        }
-      }
-      return updated;
-    };
-
-    const delIdleTimer = setInterval(
-      () => setChatters(delIdleChatters),
-      60000 * 10,
-    );
-    return function () {
-      clearInterval(delIdleTimer);
-    };
-  }, []);
-
-  useEffect(() => {
     return function () {
       const msg = `PART ${channel}`;
-      console.log(msg);
+      console.log({ msg });
       ws.send(msg);
+      resetMessages();
+      resetChatters();
     };
   }, [ws, channel]);
+
   return {
     channel,
     messages,

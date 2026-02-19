@@ -1,0 +1,6 @@
+{
+  "tasks": {
+    "frontend": "cd frontend && deno task dev",
+    "backend": "deno run --allow-all backend/main.ts"
+  }
+}

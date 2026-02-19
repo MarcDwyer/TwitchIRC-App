@@ -1,0 +1,16 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-all npm:vite",
+    "build": "deno run --allow-all npm:vite build",
+    "preview": "deno run --allow-all npm:vite preview",
+    "lint": "deno run --allow-all npm:eslint src/"
+  },
+  "nodeModulesDir": "auto",
+  "allowScripts": ["npm:@swc/core", "npm:esbuild"],
+  "compilerOptions": {
+    "types": ["react", "react-dom", "@types/react"],
+    "lib": ["dom", "dom.iterable", "deno.ns"],
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
+  }
+}

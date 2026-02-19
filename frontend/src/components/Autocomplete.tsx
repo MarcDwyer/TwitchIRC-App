@@ -30,9 +30,7 @@ export function Autocomplete({
 }: Props) {
   const [index, setIndex] = useState(0);
   const [seenChatters] = useState<string[]>(Array.from(chatters.keys()));
-  // const [matched, setMatched] = useState<string[] | null>(
-  //   null,
-  // );
+
   const listRef = useRef<HTMLDivElement>(null);
 
   const matched = useMemo(() => {
