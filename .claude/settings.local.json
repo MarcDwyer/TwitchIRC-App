@@ -14,7 +14,9 @@
       "Bash(npx tsc:*)",
       "Bash(node_modules/.bin/tsc:*)",
       "Bash(git -C /c/Users/envdi/Documents/github/Twitch-IRC-w-Cursor mv frontend/src/pages/Chatter/components/StreamSidebar frontend/src/components/StreamSidebar)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(tasklist:*)",
+      "Bash(taskkill:*)"
     ]
   }
 }

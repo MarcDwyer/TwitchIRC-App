@@ -1,6 +1,6 @@
 import { useChatterCtx } from "@Chatter/context/chatterctx.tsx";
 import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
-import { Chat } from "./components/Chat.tsx";
+import { Chat } from "../../../../components/Chat.tsx";
 import { StreamInfo } from "./components/StreamInfo.tsx";
 import { useMemo } from "react";
 
@@ -9,8 +9,7 @@ type Props = {
 };
 export function TwitchViewer({ stream }: Props) {
   const channel = useMemo(() => `#${stream.user_login}`, [stream]);
-  const embedUrl =
-    `https://player.twitch.tv/?channel=${stream.user_login}&parent=${location.hostname}`;
+  const embedUrl = `https://player.twitch.tv/?channel=${stream.user_login}&parent=${location.hostname}`;
   const { part } = useChatterCtx();
   return (
     <div className="flex flex-col h-full basis-[calc(33.333%-0.25rem)] bg-zinc-800 rounded-lg border border-zinc-700">

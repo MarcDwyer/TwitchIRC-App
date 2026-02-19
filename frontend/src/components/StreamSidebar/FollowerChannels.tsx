@@ -6,12 +6,13 @@ type Props = {
   onClick?: (stream: Stream) => void;
 };
 
-function Collapsed(
-  { following, onClick }: {
-    following: Stream[];
-    onClick?: (stream: Stream) => void;
-  },
-) {
+function Collapsed({
+  following,
+  onClick,
+}: {
+  following: Stream[];
+  onClick?: (stream: Stream) => void;
+}) {
   return (
     <>
       {following.map((stream) => (
@@ -19,7 +20,7 @@ function Collapsed(
           key={stream.id}
           type="button"
           onClick={() => onClick?.(stream)}
-          className="relative cursor-pointer flex-shrink-0"
+          className="relative cursor-pointer flex-shrink-0 mb-2"
           title={stream.user_name}
         >
           <img
@@ -36,18 +37,15 @@ function Collapsed(
   );
 }
 
-function Uncollapsed(
-  { following, onClick }: {
-    following: Stream[];
-    onClick?: (stream: Stream) => void;
-  },
-) {
+function Uncollapsed({
+  following,
+  onClick,
+}: {
+  following: Stream[];
+  onClick?: (stream: Stream) => void;
+}) {
   if (following.length === 0) {
-    return (
-      <p className="text-zinc-500 text-sm px-4 py-3">
-        No live channels
-      </p>
-    );
+    return <p className="text-zinc-500 text-sm px-4 py-3">No live channels</p>;
   }
 
   return (
@@ -73,9 +71,7 @@ function Uncollapsed(
             <p className="text-zinc-100 text-sm font-medium truncate">
               {stream.user_name}
             </p>
-            <p className="text-zinc-400 text-xs truncate">
-              {stream.game_name}
-            </p>
+            <p className="text-zinc-400 text-xs truncate">{stream.game_name}</p>
           </div>
           <div className="flex-shrink-0 flex items-center gap-1">
             <span className="inline-block w-2 h-2 rounded-full bg-red-500" />

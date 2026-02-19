@@ -29,9 +29,10 @@ export function WatchProvider({ children }: Props) {
 }
 
 export function useWatchCtx() {
-  const { _setSelected } = useContext(WatchCtx);
+  const { _setSelected, selected } = useContext(WatchCtx);
 
   return {
     setSelected: _setSelected,
+    selected,
   };
 }

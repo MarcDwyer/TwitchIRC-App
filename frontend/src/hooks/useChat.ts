@@ -144,6 +144,13 @@ export function useChat(channel: string, newMsgsCB?: NewMessagesCB) {
     };
   }, []);
 
+  useEffect(() => {
+    return function () {
+      const msg = `PART ${channel}`;
+      console.log(msg);
+      ws.send(msg);
+    };
+  }, [ws, channel]);
   return {
     channel,
     messages,

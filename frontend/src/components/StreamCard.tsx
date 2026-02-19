@@ -46,7 +46,7 @@ export function StreamCard({ stream, onClick, isPinned }: Props) {
           </span>
           <button
             type="button"
-            className="flex-shrink-0 p-1.5 rounded-full text-zinc-500 hover:text-purple-400 hover:bg-zinc-700 group-hover:text-purple-400 group-hover:shadow-[0_0_8px_rgba(168,85,247,0.5)] transition-all cursor-pointer"
+            className={`flex-shrink-0 p-1.5 rounded-full hover:bg-zinc-700 transition-all cursor-pointer ${isPinned ? "text-purple-400" : "text-zinc-500 hover:text-purple-400 group-hover:text-purple-400 group-hover:shadow-[0_0_8px_rgba(168,85,247,0.5)]"}`}
             title="Pin channel"
           >
             <svg

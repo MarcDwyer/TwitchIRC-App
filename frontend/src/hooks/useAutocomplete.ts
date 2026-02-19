@@ -3,7 +3,7 @@ import {
   CheckAutoCompleteReturn,
   checkForAutoComplete,
 } from "@Chatter/util/autcomplete.ts";
-import { InputData } from "@Chatter/components/TwitchViewer/components/Chat.tsx";
+import { InputData } from "@/components/Chat";
 
 const InitialAutoCompleteState = {
   left: -1,

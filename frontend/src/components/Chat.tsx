@@ -2,12 +2,10 @@ import { useRef, useState } from "react";
 import { useChat } from "@/hooks/useChat.ts";
 import { useAutocomplete } from "@/hooks/useAutocomplete.ts";
 import { usePause } from "@/hooks/usePause.ts";
-import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
-import { Autocomplete } from "../../../../../components/Autocomplete.tsx";
+import { Autocomplete } from "./Autocomplete.tsx";
 
 type Props = {
   channel: string;
-  stream: Stream;
 };
 export type InputData = {
   text: string;
@@ -48,7 +46,7 @@ export function Chat({ channel }: Props) {
   const { chatRef, paused, handleScroll, resumeChat } = usePause(messages);
 
   return (
-    <div className="relative flex flex-col flex-1 min-h-0">
+    <div className="relative flex flex-col w-full h-full min-h-0 bg-zinc-800">
       <div
         ref={chatRef}
         onScroll={handleScroll}

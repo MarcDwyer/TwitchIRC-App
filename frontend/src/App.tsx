@@ -7,12 +7,21 @@ import { createTwitchAPI } from "./lib/twitch_api/twitch_api.ts";
 import { Navbar } from "./components/Navbar.tsx";
 import { PinnedProvider } from "@/context/pinnedctx.tsx";
 import { TabHandler } from "./TabHandler.tsx";
+import { WatchProvider } from "@/pages/Watch/context/watchctx.tsx";
 
-export type AppTab = "chatter" | "discovery" | "watch";
+type AppList = { value: AppTab; display: string };
 
+export type AppTab = "chatter" | "top_streams" | "watch" | "browse";
+
+export const appsList: AppList[] = [
+  { value: "watch", display: "Watch" },
+  { value: "chatter", display: "Chatter" },
+  { display: "Top Streams", value: "top_streams" },
+  { value: "browse", display: "Browse" },
+];
 function App() {
   const twitch = useTwitchCtx();
-  const [appTab, setAppTab] = useState<AppTab>("chatter");
+  const [appTab, setAppTab] = useState<AppTab>("top_streams");
 
   useEffect(() => {
     if (
@@ -63,9 +72,11 @@ function App() {
       <Navbar appTab={appTab} setAppTab={setAppTab} />
       <div className="flex flex-nowrap flex-1 min-h-0 w-full">
         <PinnedProvider>
-          <ChatterCtxProvider>
-            <TabHandler appTab={appTab} setAppTab={setAppTab} />
-          </ChatterCtxProvider>
+          <WatchProvider>
+            <ChatterCtxProvider>
+              <TabHandler appTab={appTab} setAppTab={setAppTab} />
+            </ChatterCtxProvider>
+          </WatchProvider>
         </PinnedProvider>
       </div>
     </div>

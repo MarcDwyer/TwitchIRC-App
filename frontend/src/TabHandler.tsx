@@ -2,8 +2,10 @@ import { AppTab } from "./App.tsx";
 import { Stream } from "./lib/twitch_api/twitch_api_types.ts";
 import { StreamSidebar } from "./components/StreamSidebar/index.tsx";
 import { Chatter } from "@Chatter/index.tsx";
-import { Discovery } from "./pages/Discovery/index.tsx";
 import { useChatterCtx } from "@/pages/Chatter/context/chatterctx.tsx";
+import { useWatchCtx } from "@/pages/Watch/context/watchctx.tsx";
+import { Watch } from "@/pages/Watch/index.tsx";
+import { TopStreams } from "./pages/TopStreams/index.tsx";
 
 type Props = {
   appTab: AppTab;
@@ -12,28 +14,38 @@ type Props = {
 
 export function TabHandler({ appTab, setAppTab }: Props) {
   const { addViewing } = useChatterCtx();
+  const { setSelected } = useWatchCtx();
 
   const onStreamClick = (stream: Stream) => {
-    if (appTab !== "chatter") {
-      setAppTab("chatter");
+    switch (appTab) {
+      case "chatter":
+        addViewing(stream);
+        break;
+      case "top_streams":
+        setAppTab("watch");
+      case "watch":
+        setSelected(stream);
+        break;
     }
-    addViewing(stream);
   };
+
   return (
     <>
       <StreamSidebar onStreamClick={onStreamClick} />
-      {(() => {
-        switch (appTab) {
-          case "chatter":
-            return <Chatter />;
-          case "discovery":
-            return <Discovery />;
-          case "watch":
-            return <span>need to work on this</span>;
-          default:
-            return <span>App not found</span>;
-        }
-      })()}
+      <div className="h-full w-full bg-zinc-800">
+        {(() => {
+          switch (appTab) {
+            case "chatter":
+              return <Chatter />;
+            case "top_streams":
+              return <TopStreams />;
+            case "watch":
+              return <Watch />;
+            default:
+              return <span>App not found</span>;
+          }
+        })()}
+      </div>
     </>
   );
 }

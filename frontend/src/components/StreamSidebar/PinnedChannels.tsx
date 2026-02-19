@@ -1,6 +1,6 @@
 import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
 import { usePinnedCtx } from "../../context/pinnedctx.tsx";
-import { PinnedChannelMap } from "../../pages/Chatter/hooks/usePinned.ts";
+import { PinnedChannelMap } from "@/hooks/usePinned.ts";
 
 function Collapsed({
   pinned,
@@ -20,7 +20,7 @@ function Collapsed({
                 onClick?.(streamInfo);
               }
             }}
-            className="relative cursor-pointer flex-shrink-0"
+            className="relative cursor-pointer flex-shrink-0 mb-2"
             title={userInfo.display_name}
           >
             <img
@@ -128,29 +128,24 @@ type Props = {
   onClick: (stream: Stream) => void;
 };
 
-export function PinnedChannels({
-  collapsed,
-  onClick,
-}: Props) {
+export function PinnedChannels({ collapsed, onClick }: Props) {
   const { pinned, removePinned } = usePinnedCtx();
   if (pinned.size === 0) return null;
 
   return (
     <div>
-      {collapsed
-        ? (
-          <Collapsed
-            pinned={pinned}
-            onClick={onClick}
-          />
-        )
-        : (
-          <Uncollapsed
-            pinned={pinned}
-            removePinned={removePinned}
-            onClick={onClick}
-          />
-        )}
+      {collapsed ? (
+        <>
+          <div className="w-8 border-t border-zinc-700 my-2" />
+          <Collapsed pinned={pinned} onClick={onClick} />
+        </>
+      ) : (
+        <Uncollapsed
+          pinned={pinned}
+          removePinned={removePinned}
+          onClick={onClick}
+        />
+      )}
     </div>
   );
 }

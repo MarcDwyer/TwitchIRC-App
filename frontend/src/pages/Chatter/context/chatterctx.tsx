@@ -65,14 +65,6 @@ export const useChatterCtx = () => {
       ),
     [_setViewing],
   );
-  const clearViewing = () => {
-    _setViewing((prevViewing) => {
-      for (const stream of prevViewing.values()) {
-        console.log(`PARTING: #${stream.user_login}`);
-        ws?.send(`PART #${stream.user_login}`);
-      }
-      return new Map();
-    });
-  };
+  const clearViewing = () => _setViewing(new Map());
   return { part, addViewing, viewing, clearViewing };
 };
