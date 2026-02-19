@@ -4,7 +4,7 @@ import { UserInfo } from "@/lib/twitch_api/twitch_api_types.ts";
 
 export type IRCConnectionState = "disconnected" | "pending" | "authenticated";
 
-export function useTwitchIRC(): [WebSocket | null, IRCConnectionState] {
+export function useConnectIRC() {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [status, setStatus] = useState<IRCConnectionState>("disconnected");
 
@@ -49,5 +49,10 @@ export function useTwitchIRC(): [WebSocket | null, IRCConnectionState] {
       setStatus("disconnected");
     });
   }, [ws, connect]);
-  return [ws, status];
+
+  return {
+    connect,
+    ws,
+    status,
+  };
 }

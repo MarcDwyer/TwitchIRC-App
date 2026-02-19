@@ -9,6 +9,7 @@ import { PinnedProvider } from "@/context/pinnedctx.tsx";
 import { TabHandler } from "./TabHandler.tsx";
 
 export type AppTab = "chatter" | "discovery" | "watch";
+
 function App() {
   const twitch = useTwitchCtx();
   const [appTab, setAppTab] = useState<AppTab>("chatter");
@@ -25,6 +26,16 @@ function App() {
       );
     }
   }, [twitch]);
+  useEffect(() => {
+    if (
+      twitch.oauth.token &&
+      twitch.oauth.validated &&
+      twitch.twitchAPI &&
+      !twitch.irc.ws
+    ) {
+      twitch.irc.connect(twitch.oauth.token, twitch.twitchAPI.userInfo);
+    }
+  }, [twitch]);
 
   if (!twitch.clientID) {
     return <ClientIDPage />;
@@ -33,7 +44,7 @@ function App() {
     return <OAuthPage />;
   }
 
-  if (!twitch.twitchAPI) {
+  if (!twitch.twitchAPI || !twitch.irc.ws) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-zinc-900 gap-4">
         <div className="flex gap-1.5">

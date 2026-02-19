@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
-import { useChat } from "@Chatter/hooks/useChat.ts";
-import { useAutocomplete } from "@Chatter/hooks/useAutocomplete.ts";
-import { usePause } from "@Chatter/hooks/usePause.ts";
+import { useRef, useState } from "react";
+import { useChat } from "@/hooks/useChat.ts";
+import { useAutocomplete } from "@/hooks/useAutocomplete.ts";
+import { usePause } from "@/hooks/usePause.ts";
 import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
-import { Autocomplete } from "./Autocomplete.tsx";
+import { Autocomplete } from "../../../../../components/Autocomplete.tsx";
 
 type Props = {
   channel: string;
@@ -56,17 +56,19 @@ export function Chat({ channel }: Props) {
       >
         {messages.map((msg, i) => {
           const mentioned = isMentioned(msg);
-          const color = msg.tags.color && msg.tags.color !== ""
-            ? msg.tags.color
-            : "#a78bfa";
+          const color =
+            msg.tags.color && msg.tags.color !== ""
+              ? msg.tags.color
+              : "#a78bfa";
           const isSub = msg.tags.subscriber === "1";
           return (
             <div
               key={i}
-              className={`text-sm ${mentioned
-                ? "bg-purple-500/20 border-l-2 border-purple-500 pl-2 -ml-2"
-                : ""
-                }`}
+              className={`text-sm ${
+                mentioned
+                  ? "bg-purple-500/20 border-l-2 border-purple-500 pl-2 -ml-2"
+                  : ""
+              }`}
             >
               {isSub && (
                 <span className="inline-block w-2 h-2 rounded-full bg-purple-500 mr-1 align-middle" />

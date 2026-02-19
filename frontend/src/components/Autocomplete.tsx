@@ -21,13 +21,15 @@ function matchUsers(word: string, usernames: string[]) {
   return usernames.filter((user) => user.startsWith(word));
 }
 
-export function Autocomplete(
-  { onSelect, inputRef, word, disableAutocomplete, chatters }: Props,
-) {
+export function Autocomplete({
+  onSelect,
+  inputRef,
+  word,
+  disableAutocomplete,
+  chatters,
+}: Props) {
   const [index, setIndex] = useState(0);
-  const [seenChatters, setSeenChatters] = useState<string[]>(
-    Array.from(chatters.keys()),
-  );
+  const [seenChatters] = useState<string[]>(Array.from(chatters.keys()));
   // const [matched, setMatched] = useState<string[] | null>(
   //   null,
   // );
@@ -91,20 +93,21 @@ export function Autocomplete(
         ref={listRef}
         className="absolute bottom-full left-0 right-0 mx-3 mb-1 bg-zinc-800 border border-zinc-600 rounded shadow-lg max-h-40 overflow-y-auto"
       >
-        {matched && matched.map((user, i) => (
-          <button
-            key={user}
-            type="button"
-            onClick={() => onSelect(user)}
-            className={`w-full text-left px-3 py-1.5 text-sm cursor-pointer ${
-              i === index
-                ? "bg-purple-600 text-white"
-                : "text-zinc-300 hover:bg-zinc-700"
-            }`}
-          >
-            {user}
-          </button>
-        ))}
+        {matched &&
+          matched.map((user, i) => (
+            <button
+              key={user}
+              type="button"
+              onClick={() => onSelect(user)}
+              className={`w-full text-left px-3 py-1.5 text-sm cursor-pointer ${
+                i === index
+                  ? "bg-purple-600 text-white"
+                  : "text-zinc-300 hover:bg-zinc-700"
+              }`}
+            >
+              {user}
+            </button>
+          ))}
       </div>
     </>
   );
