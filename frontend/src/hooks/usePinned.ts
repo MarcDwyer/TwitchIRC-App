@@ -51,7 +51,12 @@ export function usePinned() {
       setPinned(new Map(pinned).set(stream.user_login, updatedPin));
     });
   };
-
+  const addPinnedFromLogin = async (login: string) => {
+    const userInfo = await twitchAPI.getUserByLogin(login);
+    if (!userInfo.length) return;
+    const user = userInfo[0];
+    addPinnedFromUser(user);
+  };
   const removePinned = (login: string) => {
     const updatedDel = new Map(pinned);
     updatedDel.delete(login);
@@ -108,5 +113,6 @@ export function usePinned() {
     addPinnedFromUser,
     addPinnedFromStream,
     removePinned,
+    addPinnedFromLogin,
   };
 }

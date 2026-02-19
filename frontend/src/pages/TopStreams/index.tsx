@@ -1,8 +1,8 @@
 import { StreamCard } from "@/components/StreamCard.tsx";
 import { useTopStreams } from "./hooks/useTopStreams.ts";
 import { useEffect } from "react";
-import { TopStreamsSkeleton } from "./TopStreamsSkeleton.tsx";
 import { usePinnedCtx } from "@/context/pinnedctx.tsx";
+import { StreamsSkeleton } from "@/components/StreamsSkeleton.tsx";
 
 export function TopStreams() {
   const { streams, fetchNextPage } = useTopStreams(20);
@@ -13,7 +13,7 @@ export function TopStreams() {
   }, [streams, fetchNextPage]);
 
   if (!streams) {
-    return <TopStreamsSkeleton />;
+    return <StreamsSkeleton />;
   }
   return (
     <div className="p-4 bg-zinc-900 overflow-y-auto w-full h-full">

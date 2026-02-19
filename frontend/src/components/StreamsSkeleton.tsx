@@ -1,4 +1,4 @@
-export function TopStreamsSkeleton() {
+export function StreamsSkeleton() {
   return (
     <div className="flex flex-col gap-4 bg-zinc-800 rounded-lg p-4">
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">

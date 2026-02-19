@@ -1,4 +1,5 @@
 import type {
+  ChannelAPI,
   LiveFollowedStreamsResponse,
   Stream,
   UserInfo,
@@ -50,9 +51,9 @@ export class TwitchAPI {
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(
-        `Failed to fetch user info: ${response.status} ${
-          JSON.stringify(error)
-        }`,
+        `Failed to fetch user info: ${response.status} ${JSON.stringify(
+          error,
+        )}`,
       );
     }
 
@@ -86,9 +87,9 @@ export class TwitchAPI {
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
       throw new Error(
-        `Failed to fetch live followed streams: ${response.status} ${
-          JSON.stringify(error)
-        }`,
+        `Failed to fetch live followed streams: ${response.status} ${JSON.stringify(
+          error,
+        )}`,
       );
     }
     return (await response.json()) as LiveFollowedStreamsResponse;
@@ -101,15 +102,12 @@ export class TwitchAPI {
       params.append("login", l);
     }
 
-    const response = await fetch(
-      `${baseUrl}/users?${params.toString()}`,
-      {
-        headers: {
-          "Client-ID": this.clientId,
-          Authorization: `Bearer ${this.oauthToken}`,
-        },
+    const response = await fetch(`${baseUrl}/users?${params.toString()}`, {
+      headers: {
+        "Client-ID": this.clientId,
+        Authorization: `Bearer ${this.oauthToken}`,
       },
-    );
+    });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -129,15 +127,12 @@ export class TwitchAPI {
     const params = new URLSearchParams({ first: first.toString() });
     if (after) params.append("after", after);
 
-    const response = await fetch(
-      `${baseUrl}/streams?${params.toString()}`,
-      {
-        headers: {
-          "Client-ID": this.clientId,
-          Authorization: `Bearer ${this.oauthToken}`,
-        },
+    const response = await fetch(`${baseUrl}/streams?${params.toString()}`, {
+      headers: {
+        "Client-ID": this.clientId,
+        Authorization: `Bearer ${this.oauthToken}`,
       },
-    );
+    });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
@@ -155,15 +150,14 @@ export class TwitchAPI {
     };
   }
 
-  async getStreamByLogin(login: string | string[]): Promise<Stream[]> {
-    const logins = Array.isArray(login) ? login : [login];
-    const params = new URLSearchParams();
-    for (const l of logins) {
-      params.append("user_login", l);
-    }
+  async searchChannels(
+    query: string,
+    first: number = 20,
+  ): Promise<ChannelAPI[]> {
+    const params = new URLSearchParams({ query, first: first.toString() });
 
     const response = await fetch(
-      `${baseUrl}/streams?${params.toString()}`,
+      `${baseUrl}/search/channels?${params.toString()}`,
       {
         headers: {
           "Client-ID": this.clientId,
@@ -171,6 +165,31 @@ export class TwitchAPI {
         },
       },
     );
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      throw new Error(
+        `Failed to search channels: ${response.status} ${JSON.stringify(error)}`,
+      );
+    }
+
+    const data = await response.json();
+    return data.data as ChannelAPI[];
+  }
+
+  async getStreamByLogin(login: string | string[]): Promise<Stream[]> {
+    const logins = Array.isArray(login) ? login : [login];
+    const params = new URLSearchParams();
+    for (const l of logins) {
+      params.append("user_login", l);
+    }
+
+    const response = await fetch(`${baseUrl}/streams?${params.toString()}`, {
+      headers: {
+        "Client-ID": this.clientId,
+        Authorization: `Bearer ${this.oauthToken}`,
+      },
+    });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));

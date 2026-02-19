@@ -12,11 +12,13 @@ export const PinnedProvider = ({ children }: { children: ReactNode }) => {
     addPinnedFromUser,
     addPinnedFromStream,
     removePinned,
+    addPinnedFromLogin,
   } = usePinned();
 
   return (
     <PinnedContext.Provider
       value={{
+        addPinnedFromLogin,
         pinned,
         addPinnedFromUser,
         addPinnedFromStream,

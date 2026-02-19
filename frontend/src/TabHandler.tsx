@@ -6,6 +6,7 @@ import { useChatterCtx } from "@/pages/Chatter/context/chatterctx.tsx";
 import { useWatchCtx } from "@/pages/Watch/context/watchctx.tsx";
 import { Watch } from "@/pages/Watch/index.tsx";
 import { TopStreams } from "./pages/TopStreams/index.tsx";
+import { Browse } from "./pages/Browse/index.tsx";
 
 type Props = {
   appTab: AppTab;
@@ -41,6 +42,8 @@ export function TabHandler({ appTab, setAppTab }: Props) {
               return <TopStreams />;
             case "watch":
               return <Watch />;
+            case "browse":
+              return <Browse />;
             default:
               return <span>App not found</span>;
           }
