@@ -174,7 +174,17 @@ export class TwitchAPI {
     }
 
     const data = await response.json();
-    return data.data as ChannelAPI[];
+    const channels = data.data as ChannelAPI[];
+    const q = query.toLowerCase();
+    return channels.sort((a, b) => {
+      const aLogin = a.broadcaster_login.toLowerCase();
+      const bLogin = b.broadcaster_login.toLowerCase();
+      if (aLogin === q && bLogin !== q) return -1;
+      if (bLogin === q && aLogin !== q) return 1;
+      if (aLogin.startsWith(q) && !bLogin.startsWith(q)) return -1;
+      if (bLogin.startsWith(q) && !aLogin.startsWith(q)) return 1;
+      return 0;
+    });
   }
 
   async getStreamByLogin(login: string | string[]): Promise<Stream[]> {

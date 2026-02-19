@@ -22,6 +22,7 @@ export function TabHandler({ appTab, setAppTab }: Props) {
       case "chatter":
         addViewing(stream);
         break;
+      case "browse":
       case "top_streams":
         setAppTab("watch");
       case "watch":
