@@ -60,7 +60,6 @@ function App() {
       </div>
     );
   }
-  console.log({ watchView });
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       <Navbar

@@ -38,14 +38,12 @@ export function TabHandler({ appTab, setAppTab, watchView }: Props) {
   useEffect(() => {
     if (prevView.current === watchView) return;
     if (watchView === "single") {
-      if (viewing.size) {
-        const lastAdded = Array.from(viewing.values())[viewing.size - 1];
-        setSelected(lastAdded);
-      }
+      if (!viewing.size) return;
+      const lastAdded = Array.from(viewing.values())[viewing.size - 1];
+      setSelected(lastAdded);
     } else {
-      if (selected) {
-        addViewing(selected);
-      }
+      if (!selected) return;
+      addViewing(selected);
     }
     prevView.current = watchView;
   }, [watchView, viewing, selected]);

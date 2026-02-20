@@ -2,6 +2,6 @@
 ✔ Fix grid/flexbox issues. Just make it simpler. @started(26-02-08 17:16) @done(26-02-18 15:42) @lasted(1w2d22h26m51s)
 ✔ Fix autocomplete as its more complex then it seems @done(26-02-10 05:24)
 ✔ Add more involved IRCMessage type and functions @started(26-02-09 01:24) @done(26-02-09 01:37) @lasted(13m28s)
-☐ Move IRC to App.tsx @started(26-02-18 15:42)
-☐ Create Watch App
+☐ Move IRC to App.tsx @started(26-02-18 15:42)D
+☐ Create Watch App D
 Add ability to join any channel
