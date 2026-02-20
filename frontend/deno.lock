@@ -7,6 +7,7 @@
     "npm:@vitejs/plugin-react-swc@^4.2.2": "4.2.3_vite@6.4.1__picomatch@4.0.3",
     "npm:eslint-plugin-react-hooks@^7.0.1": "7.0.1_eslint@10.0.0_zod@4.3.6",
     "npm:eslint@10": "10.0.0",
+    "npm:lucide-react@0.575": "0.575.0_react@19.2.4",
     "npm:react-dom@^19.2.0": "19.2.4_react@19.2.4",
     "npm:react@^19.2.0": "19.2.4",
     "npm:tailwindcss@^4.1.18": "4.1.18",
@@ -1215,6 +1216,12 @@
         "yallist"
       ]
     },
+    "lucide-react@0.575.0_react@19.2.4": {
+      "integrity": "sha512-VuXgKZrk0uiDlWjGGXmKV6MSk9Yy4l10qgVvzGn2AWBx1Ylt0iBexKOAoA6I7JO3m+M9oeovJd3yYENfkUbOeg==",
+      "dependencies": [
+        "react"
+      ]
+    },
     "magic-string@0.30.21": {
       "integrity": "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==",
       "dependencies": [
@@ -1468,6 +1475,7 @@
         "npm:@vitejs/plugin-react-swc@^4.2.2",
         "npm:eslint-plugin-react-hooks@^7.0.1",
         "npm:eslint@10",
+        "npm:lucide-react@0.575",
         "npm:react-dom@^19.2.0",
         "npm:react@^19.2.0",
         "npm:tailwindcss@^4.1.18",

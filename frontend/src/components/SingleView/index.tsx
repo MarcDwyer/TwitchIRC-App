@@ -1,9 +1,8 @@
-import { useWatchCtx } from "@/pages/Watch/context/watchctx";
-import { useChat } from "@/hooks/useChat.ts";
+import { useSingleViewCtx } from "@/components/SingleView/context/singleviewctx";
 import { Chat } from "@/components/Chat.tsx";
 
-export function Watch() {
-  const { selected } = useWatchCtx();
+export function SingleView() {
+  const { selected } = useSingleViewCtx();
 
   if (!selected) {
     return (
@@ -17,7 +16,7 @@ export function Watch() {
   const playerUrl = `https://player.twitch.tv/?channel=${selected.user_login}&parent=${location.hostname}`;
 
   return (
-    <WatchStream
+    <SingleViewStream
       playerUrl={playerUrl}
       channel={channel}
       userName={selected.user_name}
@@ -25,7 +24,7 @@ export function Watch() {
   );
 }
 
-function WatchStream({
+function SingleViewStream({
   playerUrl,
   channel,
   userName,

@@ -8,7 +8,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
-      "@Chatter": resolve(import.meta.dirname!, "src/pages/Chatter"),
+      "@GridView": resolve(import.meta.dirname!, "src/components/GridView"),
       "@": resolve(import.meta.dirname!, "src"),
     },
   },

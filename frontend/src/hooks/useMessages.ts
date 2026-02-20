@@ -1,8 +1,8 @@
-import { delay } from "@/pages/Chatter/util/delay";
+import { delay } from "@/components/GridView/util/delay";
 import { IrcMessage } from "@/types/twitch_data";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
-export function useMessages(channel: string) {
+export function useMessages() {
   const [messages, setMessages] = useState<IrcMessage[]>([]);
   const buffer = useRef<IrcMessage[]>([]);
   const batching = useRef<boolean>(false);

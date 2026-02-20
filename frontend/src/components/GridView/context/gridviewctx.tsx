@@ -8,7 +8,7 @@ import {
 import { Stream } from "@/lib/twitch_api/twitch_api_types.ts";
 import { useTwitchCtx } from "@/context/twitchctx";
 
-type ChatterCtxType = {
+type GridViewCtxType = {
   broadcastHandlers: React.RefObject<BroadcastHandler[]>;
   viewing: Map<string, Stream>;
   _setViewing: React.Dispatch<React.SetStateAction<Map<string, Stream>>>;
@@ -16,9 +16,9 @@ type ChatterCtxType = {
 export type BroadcastHandler = (msg: string) => void;
 
 //@ts-ignore
-const ChatterCtx = createContext<ChatterCtxType>();
+const GridViewCtx = createContext<GridViewCtxType>();
 
-export const ChatterCtxProvider = ({
+export const GridViewCtxProvider = ({
   children,
 }: {
   children: React.ReactNode;
@@ -27,7 +27,7 @@ export const ChatterCtxProvider = ({
 
   const broadcastHandlers = useRef<BroadcastHandler[]>([]);
   return (
-    <ChatterCtx.Provider
+    <GridViewCtx.Provider
       value={{
         broadcastHandlers,
         viewing,
@@ -35,12 +35,12 @@ export const ChatterCtxProvider = ({
       }}
     >
       {children}
-    </ChatterCtx.Provider>
+    </GridViewCtx.Provider>
   );
 };
 
-export const useChatterCtx = () => {
-  const { _setViewing, viewing } = useContext(ChatterCtx);
+export const useGridViewCtx = () => {
+  const { _setViewing, viewing } = useContext(GridViewCtx);
   const {
     irc: { ws },
   } = useTwitchCtx();

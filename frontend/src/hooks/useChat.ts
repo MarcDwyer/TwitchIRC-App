@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { handleMessage, HandleMsgCallbacks } from "@/util/handleMessage.ts";
-import { createIRCMessage } from "@Chatter/util/createIRCMessage.ts";
+import { createIRCMessage } from "@GridView/util/createIRCMessage.ts";
 import { IrcMessage } from "@/types/twitch_data.ts";
 import { useTwitchReady } from "./useTwitchReady.ts";
 import { useMessages } from "./useMessages.ts";
@@ -17,14 +17,14 @@ export function useChat(channel: string) {
 
   const userInfo = useTwitchReady().twitchAPI.userInfo;
 
-  const { addChatter, chatters, reset: resetChatters } = useChatters(channel);
+  const { addChatter, chatters, reset: resetChatters } = useChatters();
 
   const {
     messages,
     handleMessage: handlePrivMsg,
     addMessage,
     reset: resetMessages,
-  } = useMessages(channel);
+  } = useMessages();
 
   const userState = useRef<IrcMessage | null>(null);
 

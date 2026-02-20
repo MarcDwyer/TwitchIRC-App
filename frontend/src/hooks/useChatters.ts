@@ -4,8 +4,7 @@ import { useEffect, useRef } from "react";
 const isOlderThanMins = (timestamp: number, mins: number) =>
   Date.now() - timestamp > mins * 60 * 1000;
 
-export function useChatters(channel: string) {
-  // const [chatters, setChatters] = useState<Map<string, number>>(new Map());
+export function useChatters() {
   const chatters = useRef<Map<string, number>>(new Map());
 
   const addChatter = (msg: IrcMessage) =>

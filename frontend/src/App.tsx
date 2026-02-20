@@ -1,28 +1,21 @@
 import { useTwitchCtx } from "./context/twitchctx.tsx";
 import { ClientIDPage } from "./pages/ClientID.tsx";
 import { OAuthPage } from "./pages/OAuth.tsx";
-import { ChatterCtxProvider } from "./pages/Chatter/context/chatterctx.tsx";
 import { useEffect, useState } from "react";
 import { createTwitchAPI } from "./lib/twitch_api/twitch_api.ts";
 import { Navbar } from "./components/Navbar.tsx";
 import { PinnedProvider } from "@/context/pinnedctx.tsx";
 import { TabHandler } from "./TabHandler.tsx";
-import { WatchProvider } from "@/pages/Watch/context/watchctx.tsx";
+import { GridViewCtxProvider } from "./components/GridView/context/gridviewctx.tsx";
+import { SingleViewProvider } from "./components/SingleView/context/singleviewctx.tsx";
 
-type AppList = { value: AppTab; display: string };
+export type AppTab = "browse" | "top_streams" | "watch";
+export type WatchView = "single" | "grid";
 
-export type AppTab = "chatter" | "top_streams" | "watch" | "browse";
-
-export const appsList: AppList[] = [
-  { value: "watch", display: "Watch" },
-  { value: "chatter", display: "Chatter" },
-  { display: "Top Streams", value: "top_streams" },
-  { value: "browse", display: "Browse" },
-];
 function App() {
   const twitch = useTwitchCtx();
   const [appTab, setAppTab] = useState<AppTab>("top_streams");
-
+  const [watchView, setWatchView] = useState<WatchView>("single");
   useEffect(() => {
     if (
       twitch.clientID &&
@@ -67,16 +60,26 @@ function App() {
       </div>
     );
   }
+  console.log({ watchView });
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <Navbar appTab={appTab} setAppTab={setAppTab} />
+      <Navbar
+        appTab={appTab}
+        setAppTab={setAppTab}
+        watchView={watchView}
+        setWatchView={setWatchView}
+      />
       <div className="flex flex-nowrap flex-1 min-h-0 w-full">
         <PinnedProvider>
-          <WatchProvider>
-            <ChatterCtxProvider>
-              <TabHandler appTab={appTab} setAppTab={setAppTab} />
-            </ChatterCtxProvider>
-          </WatchProvider>
+          <SingleViewProvider>
+            <GridViewCtxProvider>
+              <TabHandler
+                appTab={appTab}
+                setAppTab={setAppTab}
+                watchView={watchView}
+              />
+            </GridViewCtxProvider>
+          </SingleViewProvider>
         </PinnedProvider>
       </div>
     </div>

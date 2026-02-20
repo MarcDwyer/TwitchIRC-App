@@ -1,22 +1,22 @@
 import { Stream } from "@/lib/twitch_api/twitch_api_types";
 import { createContext, useContext, useState } from "react";
 
-export type WatchCtxType = {
+export type SingleViewCtxType = {
   selected: Stream | null;
   _setSelected: React.Dispatch<React.SetStateAction<Stream | null>>;
   ws: WebSocket | null;
 };
 //@ts-ignore
-const WatchCtx = createContext<WatchCtxType>();
+const SingleViewCtx = createContext<SingleViewCtxType>();
 
 type Props = {
   children: React.ReactNode;
 };
-export function WatchProvider({ children }: Props) {
+export function SingleViewProvider({ children }: Props) {
   const [selected, _setSelected] = useState<Stream | null>(null);
 
   return (
-    <WatchCtx.Provider
+    <SingleViewCtx.Provider
       value={{
         selected,
         _setSelected,
@@ -24,12 +24,12 @@ export function WatchProvider({ children }: Props) {
       }}
     >
       {children}
-    </WatchCtx.Provider>
+    </SingleViewCtx.Provider>
   );
 }
 
-export function useWatchCtx() {
-  const { _setSelected, selected } = useContext(WatchCtx);
+export function useSingleViewCtx() {
+  const { _setSelected, selected } = useContext(SingleViewCtx);
 
   return {
     setSelected: _setSelected,

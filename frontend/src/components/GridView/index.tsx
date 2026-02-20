@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { TwitchViewer } from "./components/TwitchViewer/index.tsx";
-import { useChatterCtx } from "./context/chatterctx.tsx";
+import { useGridViewCtx } from "./context/gridviewctx.tsx";
 
-export function Chatter() {
-  const { viewing, clearViewing } = useChatterCtx();
+export function GridView() {
+  const { viewing, clearViewing } = useGridViewCtx();
 
   useEffect(() => {
     return function() {

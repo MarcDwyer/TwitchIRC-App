@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   CheckAutoCompleteReturn,
   checkForAutoComplete,
-} from "@Chatter/util/autcomplete.ts";
+} from "@GridView/util/autcomplete.ts";
 import { InputData } from "@/components/Chat";
 
 const InitialAutoCompleteState = {
