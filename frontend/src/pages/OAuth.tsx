@@ -3,7 +3,8 @@ import { useTwitchCtx } from "../context/twitchctx.tsx";
 import { useOAuth } from "../hooks/useOAuth.ts";
 import { useClientID } from "../hooks/useClientID.ts";
 
-const REDIRECT_URI = "http://localhost:5173/oauth/callback";
+const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
+
 const SCOPES = ["chat:read", "chat:edit", "user:read:follows"];
 
 function generateState(): string {
@@ -27,7 +28,7 @@ export function OAuthPage() {
   const handleGenerateToken = () => {
     const state = generateState();
     sessionStorage.setItem("oauth_state", state);
-
+    console.log({ REDIRECT_URI });
     const params = new URLSearchParams({
       response_type: "token",
       client_id: clientID as string,
@@ -36,8 +37,7 @@ export function OAuthPage() {
       state: state,
     });
 
-    const authUrl =
-      `https://id.twitch.tv/oauth2/authorize?${params.toString()}`;
+    const authUrl = `https://id.twitch.tv/oauth2/authorize?${params.toString()}`;
     location.href = authUrl;
   };
 
